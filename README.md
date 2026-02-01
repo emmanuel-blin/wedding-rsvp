@@ -62,7 +62,7 @@ The script will:
 | **Wedding API** | http://localhost:8080/wp-json/wedding/v1/ | - |
 | **phpMyAdmin** | http://localhost:8081 | root / rootpassword123 |
 
-\* GraphQL requires setting `WORDPRESS_ENABLE_GRAPHQL=true` in `.env`
+#### **\* GraphQL requires setting `WORDPRESS_ENABLE_GRAPHQL=true` in `.env`**
 ---
 
 ## Available Scripts

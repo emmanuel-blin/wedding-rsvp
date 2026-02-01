@@ -32,7 +32,7 @@ log_info "Step 2: Pulling images one by one..."
 IMAGES=(
     "mysql:8.0"
     "wordpress:latest"
-    "node:18-alpine"
+    "node:20-alpine"
 )
 
 # Only pull phpMyAdmin image if it's enabled
