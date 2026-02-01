@@ -46,7 +46,7 @@ export default function VenueLocation({
       <div className={`relative ${mapOrder === "rtl" ? "lg:order-2" : ""}`}>
         <div className="relative overflow-hidden rounded-sm shadow-sm border border-champagne/20">
           <iframe
-            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodedAddress}`}
+            src={`https://maps.google.com/maps?q=${encodedAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
             className="w-full h-64 md:h-96 pointer-events-none md:pointer-events-auto"
             style={{ border: 0 }}
             allowFullScreen=""
