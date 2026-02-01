@@ -1,41 +1,46 @@
-# WordPress Headless CMS + Vite/React Docker Setup
+# Wedding RSVP - Docker Deployment
 
-A complete Docker Compose configuration for running WordPress as a headless CMS with a Vite/React frontend. WordPress automatically installs and configures itself as a headless backend.
+A premium, invite-only wedding RSVP website with React frontend and headless WordPress backend, fully containerized for easy deployment.
 
 ## Architecture
 
-- **WordPress** (Port 8080) - Headless CMS backend with REST API
-- **Vite/React** (Port 5173) - Modern frontend with hot-reload
-- **MySQL** (Internal) - Database for WordPress
-- **phpMyAdmin** (Port 8081) - Database management interface (optional)
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────┐
+│  React/Vite     │───▶│  WordPress       │───▶│  MySQL      │
+│  Port 5173      │    │  Port 8080       │    │  (internal) │
+│  (Frontend)     │    │  (REST API)      │    │             │
+└─────────────────┘    └──────────────────┘    └─────────────┘
+                             │
+                       ┌─────┴─────┐
+                       │ phpMyAdmin│
+                       │ Port 8081 │
+                       └───────────┘
+```
 
 ## Quick Start
 
 ### Prerequisites
+- Docker and Docker Compose
+- 2GB+ free RAM
+- 6GB+ free disk space
 
-- Docker and Docker Compose installed
-- At least 2GB free RAM
-- At least 6GB free space
-
-### 1. Setup Environment
+### Deploy
 
 ```bash
-# Make the scripts executable
-chmod +x deploy.sh
-chmod +x debug.sh
-chmod +x wordpress-entrypoint.sh
-chmod +x wordpress-setup.sh
+cd deploy
 
-# Copy environment file
+# Make scripts executable
+chmod +x deploy.sh debug.sh wordpress-entrypoint.sh wordpress-setup.sh
+
+# Copy environment template
 cp .env.example .env
 
 # (Optional) Edit .env to customize passwords
 nano .env
 ```
 
-### 2. Deploy Everything
-
-```bash
+### Deploy everything
+```bash 
 # Run the deployment script
 ./deploy.sh
 ```
@@ -47,21 +52,130 @@ The script will:
 - Start React frontend
 - Start phpMyAdmin (optional)
 
-### 3. Access Services
+### Access Services
 
-Once deployment completes:
-
-| Service | URL | Credentials | Status |
-|---------|-----|-------------|--------|
-| **WordPress Admin** | http://localhost:8080/wp-admin | admin / admin123 (or from .env) | Required |
-| **WordPress REST API** | http://localhost:8080/wp-json/wp/v2/ | - | Required |
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Wedding Site** | http://localhost:5173?code=TEST123 | - |
+| **WordPress Admin** | http://localhost:8080/wp-admin | admin / admin123 |
 | **WordPress GraphQL** | http://localhost:8080/graphql | - | Optional* |
-| **React Frontend** | http://localhost:5173 | - | Required |
-| **phpMyAdmin** | http://localhost:8081 | root / rootpassword123 | Optional |
+| **Wedding API** | http://localhost:8080/wp-json/wedding/v1/ | - |
+| **phpMyAdmin** | http://localhost:8081 | root / rootpassword123 |
 
 \* GraphQL requires setting `WORDPRESS_ENABLE_GRAPHQL=true` in `.env`
+---
 
-### 4. Setup React Frontend (First Time)
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `./deploy.sh` | Full deployment with health checks |
+| `./debug.sh` | Diagnose deployment issues |
+| `docker compose up -d` | Start all services |
+| `docker compose down` | Stop all services |
+| `docker compose down -v` | Stop and delete all data |
+| `docker compose logs -f wordpress` | Watch WordPress logs |
+
+## Project Structure
+
+```
+wedding-rsvp/
+├── deploy/                          # Docker deployment
+│   ├── docker-compose.yml
+│   ├── deploy.sh                    # One-command deploy
+│   ├── debug.sh                     # Troubleshooting
+│   ├── wordpress-setup.sh           # WP auto-config
+│   ├── wordpress-entrypoint.sh
+│   ├── .env                         # Your config
+│   ├── .env.example                 # Template
+│   ├── frontend/                    # React/Vite app
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── Hero.jsx
+│   │   │   │   ├── OurStory.jsx
+│   │   │   │   ├── Location.jsx
+│   │   │   │   ├── CityHall.jsx
+│   │   │   │   ├── Timeline.jsx
+│   │   │   │   └── RSVPForm.jsx
+│   │   │   └── App.jsx
+│   │   └── package.json
+│   ├── wp-plugins/
+│   │   └── wedding-rsvp-api/        # Custom WP plugin
+│   └── wp-themes/
+│       └── weddingrsvpblank/        # Blank WP theme
+└── README.md
+```
+
+### Enable GraphQL (Optional)
+
+To enable GraphQL support:
+
+```bash
+# Edit .env and add:
+WORDPRESS_ENABLE_GRAPHQL=true
+
+# Rebuild WordPress container:
+docker compose up -d --build wordpress
+```
+
+Then access GraphQL at: http://localhost:8080/graphql
+
+---
+
+## Environment Variables
+
+Edit `deploy/.env` to customize:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WORDPRESS_ADMIN_USER` | admin | WP admin username |
+| `WORDPRESS_ADMIN_PASSWORD` | admin123 | WP admin password |
+| `WORDPRESS_SITE_TITLE` | Headless WordPress | Site title |
+| `VITE_API_BASE` | http://localhost:8080/wp-json/wedding/v1 | Wedding API URL |
+| `WORDPRESS_CORS_ORIGINS` | http://localhost:5173 | Allowed CORS origins |
+| `WORDPRESS_ENABLE_GRAPHQL` | false | Enable WPGraphQL plugin |
+
+---
+
+## API Endpoints
+
+All endpoints under `/wp-json/wedding/v1/`:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/settings` | GET | Wedding settings (dates, venue, etc.) |
+| `/stories` | GET | Our Story posts |
+| `/validate-code` | POST | Validate access code |
+| `/rsvp` | POST | Submit RSVP |
+
+---
+
+## Access Codes
+
+Manage in WordPress Admin → Wedding Settings:
+
+| Code | Purpose |
+|------|---------|
+| `TEST123` | Testing |
+| `LOVE2025` | Guest invite |
+| `WEDDING` | Guest invite |
+
+---
+
+## Commands
+
+```bash
+cd deploy
+
+./deploy.sh                    # Full deployment
+./debug.sh                     # Diagnose issues
+docker compose down            # Stop services
+docker compose down -v         # Stop + delete data
+docker compose logs -f wordpress  # Watch WP logs
+```
+
+
+### Setup React Frontend (If you don't want to use the one in the repo)
 
 ```bash
 cd frontend
@@ -76,7 +190,7 @@ npm install
 cd ..
 ```
 
-### 5. Connect Frontend to WordPress
+### Connect Frontend to WordPress
 
 Environment variables are automatically configured:
 
@@ -90,65 +204,11 @@ fetch(`${API_URL}/posts`)
   .then(posts => console.log(posts));
 ```
 
-### 6. Enable GraphQL (Optional)
-
-To enable GraphQL support:
-
-```bash
-# Edit .env and add:
-WORDPRESS_ENABLE_GRAPHQL=true
-
-# Rebuild WordPress container:
-docker compose up -d --build wordpress
-```
-
-Then access GraphQL at: http://localhost:8080/graphql
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `./deploy.sh` | Full deployment with health checks |
-| `./debug.sh` | Diagnose deployment issues |
-| `docker compose up -d` | Start all services |
-| `docker compose down` | Stop all services |
-| `docker compose down -v` | Stop and delete all data |
-| `docker compose logs -f wordpress` | Watch WordPress logs |
-
-## Directory Structure
-
-```
-.
-├── docker-compose.yml          # Docker services configuration
-├── .env.example                # Environment variables template
-├── .env                        # Your environment variables
-├── debug.sh                    # One-command deployment diagnosis
-├── deploy.sh                   # One-command deployment script
-├── wordpress-entrypoint.sh     # WordPress container entrypoint
-├── wordpress-setup.sh          # WordPress automatic setup script
-├── frontend/                   # Your Vite/React application
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-└── README.md                   # This file
-```
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MYSQL_ROOT_PASSWORD` | rootpassword123 | MySQL root password |
-| `MYSQL_PASSWORD` | wordpress123 | WordPress database password |
-| `WORDPRESS_ADMIN_USER` | admin | WordPress admin username |
-| `WORDPRESS_ADMIN_PASSWORD` | admin123 | WordPress admin password |
-| `WORDPRESS_SITE_TITLE` | Headless WordPress | Site title |
-| `WORDPRESS_ENABLE_GRAPHQL` | false | Enable GraphQL plugin (set to `true` to enable) |
-| `VITE_WP_API_URL` | http://localhost:8080/wp-json/wp/v2 | REST API URL |
+---
 
 ## Troubleshooting
 
 ### Reset Everything
-
 ```bash
 # Stop and remove all containers, volumes, and images
 docker compose down
@@ -158,7 +218,7 @@ cp .env.example .env
 ./deploy.sh
 ```
 
-### MySql failed
+### MySql health check failed
 During first deploy MySql can return `[ERROR] MySQL failed to become healthy (status: unhealthy)`
 
 ```bash
@@ -199,9 +259,23 @@ docker exec -it wordpress_backend bash
 wp core install --url='http://localhost:8080' --title='My Site' --admin_user='admin' --admin_password='admin123' --admin_email='admin@example.com' --allow-root
 ```
 
+### REST API 404
+Permalinks are auto-configured. If issues persist:
+```bash
+docker exec -it wordpress_backend wp rewrite flush --allow-root
+```
+
+### CORS Errors
+Add your domain to `WORDPRESS_CORS_ORIGINS` in `.env`:
+```env
+WORDPRESS_CORS_ORIGINS=http://localhost:5173,https://your-domain.com
+```
+
+---
+
 ### Frontend hot-reload not working
 
-Make sure `vite.config.js` includes:
+Make sure `vite.config.js` includes development mode:
 
 ```javascript
 export default {

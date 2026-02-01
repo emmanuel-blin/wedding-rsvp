@@ -2,7 +2,7 @@
 
 A premium, invite-only wedding website built with React, Tailwind CSS v4, and a headless WordPress backend.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Frontend (React)
 ```bash
@@ -11,38 +11,42 @@ npm install
 
 # Start dev server
 npm run dev
+
+# Start prod server
+npm run build
 ```
 Visit: `http://localhost:5173/?code=TEST123`
 
 ### Backend (WordPress)
 1. Ensure WAMP/XAMPP is running
 2. Create database: `wedding-rsvp`
-3. Visit: `http://localhost/wedding-rsvp/backend/wp-admin`
-4. Activate **Twenty Twenty-Five** theme
+3. Visit: `http://localhost/wp-admin`
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-wedding-rsvp/
+frontend/
 ├── src/
 │   ├── components/
+│   │   ├── CityHall.jsx      # City Hall section
 │   │   ├── Hero.jsx          # Countdown timer & CTA
+│   │   ├── Location.jsx      # Location section
 │   │   ├── OurStory.jsx      # Photo grid section
-│   │   ├── Location.jsx      # Map & directions
-│   │   ├── Timeline.jsx      # Event schedule
 │   │   └── RSVPForm.jsx      # Multi-step form
+│   │   ├── VenueLocation.jsx # Venue location section
+│   │   ├── Timeline.jsx      # Event schedule
+│   ├── utils/
+│   │   ├── translations.js   # Translation file
 │   ├── App.jsx
 │   └── index.css             # Tailwind config
-├── backend/                   # WordPress installation
-│   └── wp-content/themes/twentytwentyfive/functions.php
 └── index.html
 ```
 
 ---
 
-## 🔑 Access Codes
+## Access Codes
 
 | Code | Purpose |
 |------|---------|
@@ -54,7 +58,7 @@ wedding-rsvp/
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Wedding Date
 Edit `src/components/Hero.jsx`:
@@ -77,22 +81,22 @@ Edit `src/index.css`:
 
 ---
 
-## 🔗 API Endpoints
+## API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/backend/wp-json/wedding/v1/rsvp` | POST | Submit RSVP |
-| `/backend/wp-json/wedding/v1/validate-code` | POST | Validate access code |
+| `wp-json/wedding/v1/rsvp` | POST | Submit RSVP |
+| `wp-json/wedding/v1/validate-code` | POST | Validate access code |
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 - **Frontend**: React 19, Vite 7, Tailwind CSS 4
 - **Backend**: WordPress (REST API)
 - **Fonts**: Playfair Display, Inter
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### REST API returns 404
 If the `/wp-json/` endpoints return a 404 error:
@@ -112,6 +116,6 @@ If the `/wp-json/` endpoints return a 404 error:
 
 ---
 
-## 📝 License
+## License
 
 Private - For personal use only.
