@@ -1,0 +1,115 @@
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: wordpress_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # WordPress (Headless CMS Backend)
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: ${DB_HOST:-db}:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      # Admin credentials for automatic WordPress installation
+      WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
+      WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD:-admin123}
+      WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
+      WORDPRESS_SITE_TITLE: ${WORDPRESS_SITE_TITLE:-Headless WordPress}
+      WP_HOME: ${WP_HOME:-http://localhost:8080}
+      WP_SITEURL: ${WP_SITEURL:-http://localhost:8080}
+      WORDPRESS_URL: ${WP_HOME}
+      # Optional features
+      WORDPRESS_ENABLE_GRAPHQL: ${WORDPRESS_ENABLE_GRAPHQL:-false}
+      WORDPRESS_CORS_ORIGINS: ${WORDPRESS_CORS_ORIGINS:-http://localhost:5173}
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wordpress-setup.sh:/usr/local/bin/wordpress-setup.sh:ro
+      - ./wordpress-entrypoint.sh:/usr/local/bin/wordpress-entrypoint.sh:ro
+      # Wedding RSVP plugin and theme
+      - ./wp-plugins/wedding-rsvp-api:/var/www/html/wp-content/plugins/wedding-rsvp-api:ro
+      - ./wp-themes/weddingrsvpblank:/var/www/html/wp-content/themes/weddingrsvpblank:ro
+    entrypoint: ["/usr/local/bin/wordpress-entrypoint.sh"]
+    networks:
+      - wordpress_network
+    healthcheck:
+      # Check if WordPress root responds (setup may not have run yet)
+      test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php", "||", "curl", "-f", "http://localhost:80/wp-json/wp/v2/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  # Vite/React Frontend
+  frontend:
+    image: node:18-alpine
+    container_name: vite_frontend
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE=${VITE_API_BASE:-http://localhost:8080/wp-json/wedding/v1}
+      - VITE_WP_GRAPHQL_URL=${VITE_WP_GRAPHQL_URL:-http://localhost:8080/graphql}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - wordpress_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # phpMyAdmin (Optional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wordpress_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    networks:
+      - wordpress_network
+
+volumes:
+  db_data:
+  wordpress_data:
+
+networks:
+  wordpress_network:
+    driver: bridge

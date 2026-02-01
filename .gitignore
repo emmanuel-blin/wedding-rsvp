@@ -1,0 +1,55 @@
+.git
+
+# Logs
+logs
+*.log
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+
+# Frontend build output
+frontend/node_modules
+frontend/dist
+deploy/frontend/dist
+deploy/frontend/.vite
+
+# Package manager locks (optional - keep if you want reproducible builds)
+# deploy/frontend/package-lock.json
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker volumes (if created locally)
+db_data/
+wordpress_data/
+
+# WordPress uploads (if accidentally committed)
+wp-content/uploads/
+
+# Test/temp files
+*.tmp
+*.temp
+.cache

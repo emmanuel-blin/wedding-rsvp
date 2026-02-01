@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", "Montserrat", sans-serif;
+
+  --color-cream: #fdfaf5;
+  --color-champagne: #f7e7ce;
+  --color-rose-gold: #b76e79;
+  --color-burgundy: #800020;
+  --color-navy: #000080;
+  --color-gold: #d4af37;
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-gray-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
