@@ -95,7 +95,7 @@ export default function VenueLocation({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-4 py-3 border border-burgundy text-burgundy rounded-sm hover:bg-burgundy hover:text-white transition-all duration-300 text-sm uppercase tracking-wider"
+              className="flex items-center justify-center gap-2 px-4 py-3 shadow-md hover:shadow-xl border-2 border-transparent hover:border-gold text-burgundy hover:text-gold rounded-sm transition-all duration-300 text-sm uppercase tracking-wider bg-cream active:bg-white hover:bg-white "
             >
               {link.icon}
               {link.name}

@@ -16,6 +16,9 @@ chmod +x /usr/local/bin/wp
 # Change to WordPress directory
 cd /var/www/html
 
+# Define desired URL from environment (available throughout script)
+DESIRED_URL=${WP_HOME:-http://localhost:8080}
+
 # Wait for WordPress to be fully initialized (wp-config.php exists)
 echo "Waiting for WordPress files to be ready..."
 for i in {1..60}; do
@@ -36,10 +39,9 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
     WP_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD:-admin123}
     WP_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
     WP_SITE_TITLE=${WORDPRESS_SITE_TITLE:-Headless WordPress}
-    WP_URL=${WORDPRESS_URL:-http://localhost:8080}
     
     wp core install \
-        --url="$WP_URL" \
+        --url="$DESIRED_URL" \
         --title="$WP_SITE_TITLE" \
         --admin_user="$WP_ADMIN_USER" \
         --admin_password="$WP_ADMIN_PASSWORD" \
@@ -51,7 +53,33 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
     echo "Admin User: $WP_ADMIN_USER"
     echo "Admin Password: $WP_ADMIN_PASSWORD"
 else
-    echo "WordPress already installed, skipping installation."
+    echo "WordPress already installed, checking for URL updates..."
+    
+    # Get current URLs from database
+    CURRENT_SITEURL=$(wp option get siteurl --allow-root 2>/dev/null || echo "")
+    CURRENT_HOME=$(wp option get home --allow-root 2>/dev/null || echo "")
+    
+    # Update siteurl if different
+    if [ "$CURRENT_SITEURL" != "$DESIRED_URL" ]; then
+        echo "Updating siteurl: $CURRENT_SITEURL -> $DESIRED_URL"
+        wp option update siteurl "$DESIRED_URL" --allow-root
+    fi
+    
+    # Update home if different
+    if [ "$CURRENT_HOME" != "$DESIRED_URL" ]; then
+        echo "Updating home: $CURRENT_HOME -> $DESIRED_URL"
+        wp option update home "$DESIRED_URL" --allow-root
+    fi
+    
+    # Also update WordPress Address URL if WP_SITEURL is set differently
+    if [ -n "$WP_SITEURL" ] && [ "$WP_SITEURL" != "$DESIRED_URL" ]; then
+        if [ "$CURRENT_SITEURL" != "$WP_SITEURL" ]; then
+            echo "Updating siteurl to WP_SITEURL: $WP_SITEURL"
+            wp option update siteurl "$WP_SITEURL" --allow-root
+        fi
+    fi
+    
+    echo "URL check complete."
 fi
 
 # Optionally install WPGraphQL plugin (disabled by default)
@@ -59,7 +87,7 @@ ENABLE_GRAPHQL=${WORDPRESS_ENABLE_GRAPHQL:-false}
 if [ "$ENABLE_GRAPHQL" = "true" ]; then
     echo "Installing WPGraphQL plugin..."
     wp plugin install wp-graphql --activate --allow-root 2>/dev/null || true
-    echo "GraphQL enabled at: http://localhost:8080/graphql"
+    echo "GraphQL enabled at: ${DESIRED_URL:-http://localhost:8080}/graphql"
 else
     echo "GraphQL plugin skipped (enable with WORDPRESS_ENABLE_GRAPHQL=true)"
 fi
@@ -124,12 +152,12 @@ wp rewrite structure '/%postname%/' --hard --allow-root 2>/dev/null || true
 echo "=========================================="
 echo "WordPress headless setup complete!"
 echo "=========================================="
-echo "Site URL:    http://localhost:8080"
-echo "Admin Panel: http://localhost:8080/wp-admin"
-echo "REST API:    http://localhost:8080/wp-json/wp/v2/"
-echo "Wedding API: http://localhost:8080/wp-json/wedding/v1/"
+echo "Site URL:    ${DESIRED_URL:-http://localhost:8080}"
+echo "Admin Panel: ${DESIRED_URL:-http://localhost:8080}/wp-admin"
+echo "REST API:    ${DESIRED_URL:-http://localhost:8080}/wp-json/wp/v2/"
+echo "Wedding API: ${DESIRED_URL:-http://localhost:8080}/wp-json/wedding/v1/"
 if [ "$ENABLE_GRAPHQL" = "true" ]; then
-    echo "GraphQL:     http://localhost:8080/graphql"
+    echo "GraphQL:     ${DESIRED_URL:-http://localhost:8080}/graphql"
 fi
 echo ""
 echo "Admin Credentials:"
