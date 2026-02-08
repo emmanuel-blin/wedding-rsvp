@@ -6,7 +6,7 @@
  * Description: Add RSVP functionality to wordpress REST API
  * Requires at least: 5.0
  * Requires PHP: 5.6
- * Version: 1.0
+ * Version: 1.1.1
  * Author: E.Blin
  * Author URI: https://b-link.xyz
  * Text Domain: Wedding RSVP

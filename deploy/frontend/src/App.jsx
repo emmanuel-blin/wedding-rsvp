@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import packageJson from '../package.json';
 import Hero from './components/Hero';
 import OurStory from './components/OurStory';
 import Location from './components/Location';
@@ -126,9 +127,14 @@ function App() {
         <p className="text-champagne/80 text-sm tracking-widest uppercase">
           {coupleNames[0]} & {coupleNames[1]} • {new Date(weddingDate).toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
-        <p className="text-champagne/60 text-xs mt-2">
-          Made with love
-        </p>
+        <div className="flex gap-2 justify-center">
+          <p className="text-champagne/60 text-xs mt-2">
+            Version {packageJson.version}
+          </p>
+          <p className="text-champagne/60 text-xs mt-2">
+            Made with love
+          </p>
+        </div>
       </footer>
     </div>
   );
