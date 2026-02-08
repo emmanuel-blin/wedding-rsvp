@@ -95,6 +95,7 @@ wedding-rsvp/
 │   │   │   │   ├── OurStory.jsx
 │   │   │   │   ├── Location.jsx
 │   │   │   │   ├── CityHall.jsx
+│   │   │   │   ├── SleepLocation.jsx
 │   │   │   │   ├── Timeline.jsx
 │   │   │   │   └── RSVPForm.jsx
 │   │   │   └── App.jsx

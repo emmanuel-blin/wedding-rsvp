@@ -69,6 +69,12 @@ function wedding_get_settings() {
             'subtitle' => get_option('wedding_location_subtitle', 'Find Your Way'),
             'title' => get_option('wedding_location_title', 'Location'),
         ],
+        'sleepLocation' => [
+            'subtitle' => get_option('wedding_sleep_subtitle', 'Need a Place to Stay'),
+            'title' => get_option('wedding_sleep_title', 'Accommodation'),
+            'description' => get_option('wedding_sleep_description', "Looking for a place to stay? We've partnered with local accommodations to make your visit comfortable. Book your stay near the venue using the links below."),
+            'venueName' => get_option('wedding_venue_name', 'The venue name'),
+        ],
         'timeline' => [
             'subtitle' => get_option('wedding_timeline_subtitle', 'The Schedule'),
             'title' => get_option('wedding_timeline_title', 'Timeline'),

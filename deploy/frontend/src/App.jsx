@@ -3,6 +3,7 @@ import Hero from './components/Hero';
 import OurStory from './components/OurStory';
 import Location from './components/Location';
 import CityHall from './components/CityHall';
+import SleepLocation from './components/SleepLocation';
 import Timeline from './components/Timeline';
 import RSVPForm from './components/RSVPForm';
 import { useTranslation } from 'react-i18next';
@@ -112,6 +113,7 @@ function App() {
           </div>
           <CityHall cityHall={settings?.cityHall} />
           <Location venue={settings?.venue} />
+           <SleepLocation sleepLocation={settings?.sleepLocation} />
         </div>
       </section>
       <Timeline timeline={settings?.timeline} />
