@@ -32,14 +32,14 @@ done
 # Check if WordPress is already installed
 if ! wp core is-installed --allow-root 2>/dev/null; then
     echo "WordPress not installed yet. Running installation..."
-    
+
     # Install WordPress with admin user
     # Using environment variables or defaults
     WP_ADMIN_USER=${WORDPRESS_ADMIN_USER:-admin}
     WP_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD:-admin123}
     WP_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
     WP_SITE_TITLE=${WORDPRESS_SITE_TITLE:-Headless WordPress}
-    
+
     wp core install \
         --url="$DESIRED_URL" \
         --title="$WP_SITE_TITLE" \
@@ -48,29 +48,29 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
         --admin_email="$WP_ADMIN_EMAIL" \
         --skip-email \
         --allow-root
-    
+
     echo "WordPress installed successfully!"
     echo "Admin User: $WP_ADMIN_USER"
     echo "Admin Password: $WP_ADMIN_PASSWORD"
 else
     echo "WordPress already installed, checking for URL updates..."
-    
+
     # Get current URLs from database
     CURRENT_SITEURL=$(wp option get siteurl --allow-root 2>/dev/null || echo "")
     CURRENT_HOME=$(wp option get home --allow-root 2>/dev/null || echo "")
-    
+
     # Update siteurl if different
     if [ "$CURRENT_SITEURL" != "$DESIRED_URL" ]; then
         echo "Updating siteurl: $CURRENT_SITEURL -> $DESIRED_URL"
         wp option update siteurl "$DESIRED_URL" --allow-root
     fi
-    
+
     # Update home if different
     if [ "$CURRENT_HOME" != "$DESIRED_URL" ]; then
         echo "Updating home: $CURRENT_HOME -> $DESIRED_URL"
         wp option update home "$DESIRED_URL" --allow-root
     fi
-    
+
     # Also update WordPress Address URL if WP_SITEURL is set differently
     if [ -n "$WP_SITEURL" ] && [ "$WP_SITEURL" != "$DESIRED_URL" ]; then
         if [ "$CURRENT_SITEURL" != "$WP_SITEURL" ]; then
@@ -78,7 +78,7 @@ else
             wp option update siteurl "$WP_SITEURL" --allow-root
         fi
     fi
-    
+
     echo "URL check complete."
 fi
 

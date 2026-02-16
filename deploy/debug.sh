@@ -29,7 +29,7 @@ echo "=========================================="
 
 if docker ps | grep -q wordpress_db; then
     log_ok "MySQL container is running"
-    
+
     # Check health
     health=$(docker inspect --format='{{.State.Health.Status}}' wordpress_db 2>/dev/null || echo "unknown")
     if [ "$health" = "healthy" ]; then
@@ -37,7 +37,7 @@ if docker ps | grep -q wordpress_db; then
     else
         log_warn "MySQL health: $health"
     fi
-    
+
     # Check logs for errors
     if docker logs --tail=20 wordpress_db 2>&1 | grep -qi error; then
         log_warn "Errors found in MySQL logs"
@@ -45,7 +45,7 @@ if docker ps | grep -q wordpress_db; then
     else
         log_ok "No recent errors in MySQL logs"
     fi
-    
+
     # Test connection
     if docker exec wordpress_db mysqladmin ping -h localhost -uroot -p"${MYSQL_ROOT_PASSWORD:-rootpassword123}" &>/dev/null; then
         log_ok "MySQL responding to ping"
@@ -63,35 +63,35 @@ echo "=========================================="
 
 if docker ps | grep -q wordpress_backend; then
     log_ok "WordPress container is running"
-    
+
     # Check if WordPress is installed
     if docker exec wordpress_backend wp core is-installed --allow-root 2>/dev/null; then
         log_ok "WordPress IS installed"
     else
         log_error "WordPress NOT installed"
     fi
-    
+
     # Check for wp-config.php
     if docker exec wordpress_backend test -f /var/www/html/wp-config.php; then
         log_ok "wp-config.php exists"
     else
         log_error "wp-config.php NOT found"
     fi
-    
+
     # Check setup script execution
     if docker logs wordpress_backend 2>&1 | grep -q "WordPress headless setup complete"; then
         log_ok "Setup script ran successfully"
     else
         log_warn "Setup script may not have completed"
     fi
-    
+
     # Check database connection from WordPress
     if docker exec wordpress_backend mysql -h db -u wordpress -p"${MYSQL_PASSWORD:-wordpress123}" -e "SELECT 1" wordpress &>/dev/null; then
         log_ok "WordPress can connect to database"
     else
         log_error "WordPress cannot connect to database"
     fi
-    
+
     # Show last 10 log lines
     echo ""
     echo "Recent WordPress logs:"
@@ -107,21 +107,21 @@ echo "=========================================="
 
 if docker ps | grep -q vite_frontend; then
     log_ok "Frontend container is running"
-    
+
     # Check if node_modules exists
     if docker exec vite_frontend test -d /app/node_modules; then
         log_ok "node_modules exists"
     else
         log_warn "node_modules NOT found (may need npm install)"
     fi
-    
+
     # Check if frontend is responding
     if docker exec vite_frontend wget -q --spider http://localhost:5173 2>/dev/null; then
         log_ok "Frontend responding on port 5173"
     else
         log_warn "Frontend not responding (may still be starting)"
     fi
-    
+
     # Show recent logs
     echo ""
     echo "Recent frontend logs:"
@@ -137,7 +137,7 @@ echo "=========================================="
 
 if docker ps | grep -q wordpress_phpmyadmin; then
     log_ok "phpMyAdmin container is running"
-    
+
     # Check if responding
     if docker exec wordpress_phpmyadmin wget -q --spider http://localhost:80 2>/dev/null; then
         log_ok "phpMyAdmin responding"

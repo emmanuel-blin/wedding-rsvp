@@ -11,7 +11,7 @@ function wedding_register_rsvp_routes() {
         'callback' => 'wedding_handle_rsvp_submission',
         'permission_callback' => '__return_true',
     ]);
-    
+
     // Code validation endpoint
     register_rest_route('wedding/v1', '/validate-code', [
         'methods' => 'POST',
@@ -26,17 +26,17 @@ function wedding_register_rsvp_routes() {
 function wedding_validate_access_code($request) {
     $params = $request->get_json_params();
     $code = strtoupper(sanitize_text_field($params['code'] ?? ''));
-    
+
     // Get valid codes from settings
     $valid_codes = wedding_get_valid_codes();
-    
+
     if (in_array($code, $valid_codes)) {
         return rest_ensure_response([
             'valid' => true,
             'message' => 'Access granted',
         ]);
     }
-    
+
     return new WP_Error(
         'invalid_code',
         'Invalid access code. Please check your invitation.',
@@ -49,22 +49,22 @@ function wedding_validate_access_code($request) {
  */
 function wedding_handle_rsvp_submission($request) {
     $params = $request->get_json_params();
-    
+
     // Validate access code
     $code = strtoupper(sanitize_text_field($params['accessCode'] ?? ''));
     $valid_codes = wedding_get_valid_codes();
-    
+
     if (!in_array($code, $valid_codes)) {
         return new WP_Error('invalid_code', 'Invalid access code', ['status' => 403]);
     }
-    
+
     // Sanitize data
     $attendance = sanitize_text_field($params['attendance'] ?? '');
     $guests = array_map('sanitize_text_field', $params['guests'] ?? []);
     $meal_preference = sanitize_text_field($params['mealPreference'] ?? '');
     $dietary_restrictions = sanitize_textarea_field($params['dietaryRestrictions'] ?? '');
     $song_request = sanitize_text_field($params['songRequest'] ?? '');
-    
+
     // Build guest names for title
     $guest_names = [];
     foreach ($params['guests'] as $guest) {
@@ -73,7 +73,7 @@ function wedding_handle_rsvp_submission($request) {
         }
     }
     $title = implode(', ', $guest_names) ?: 'Anonymous Guest';
-    
+
     // Create RSVP post
     $post_id = wp_insert_post([
         'post_type' => 'wedding_rsvp',
@@ -90,15 +90,15 @@ function wedding_handle_rsvp_submission($request) {
             'submitted_at' => current_time('mysql'),
         ],
     ]);
-    
+
     if (is_wp_error($post_id)) {
         return new WP_Error('save_failed', 'Could not save RSVP', ['status' => 500]);
     }
-    
+
     // Send email notification
     $admin_email = get_option('admin_email');
     $subject = $attendance ? "🎉 New RSVP: {$title} is attending!" : "💔 RSVP: {$title} cannot attend";
-    
+
     $message = "A new RSVP has been submitted:\n\n";
     $message .= "Guests: {$title}\n";
     $message .= "Status: " . ($attendance ? 'Attending' : 'Declined') . "\n";
@@ -114,9 +114,9 @@ function wedding_handle_rsvp_submission($request) {
     }
     $message .= "\nAccess code used: {$code}\n";
     $message .= "Submitted: " . current_time('F j, Y g:i a');
-    
+
     wp_mail($admin_email, $subject, $message);
-    
+
     return rest_ensure_response([
         'success' => true,
         'message' => 'RSVP submitted successfully',

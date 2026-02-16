@@ -12,16 +12,16 @@ add_action('rest_api_init', function() {
             return $value; // No CORS config, skip
         }
         $allowed_origins = array_map('trim', explode(',', $env_origins));
-        
+
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        
+
         if (in_array($origin, $allowed_origins)) {
             header('Access-Control-Allow-Origin: ' . $origin);
             header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
             header('Access-Control-Allow-Headers: Content-Type');
             header('Access-Control-Allow-Credentials: true');
         }
-        
+
         return $value;
     });
 }, 15);

@@ -11,7 +11,7 @@ function wedding_register_get_routes() {
         'callback' => 'wedding_get_settings',
         'permission_callback' => '__return_true',
     ]);
-    
+
     // Get stories
     register_rest_route('wedding/v1', '/stories', [
         'methods' => 'GET',
@@ -37,7 +37,7 @@ function wedding_get_options_array($prefix, $count, $default) {
 function wedding_get_settings() {
     $date = get_option('wedding_date', '2026-09-26');
     $time = get_option('wedding_time', '14:00');
-    
+
     return rest_ensure_response([
         'weddingDate' => $date . 'T' . $time . ':00',
         'coupleNames' => [
@@ -99,7 +99,7 @@ function wedding_get_settings() {
                 'shortname' => get_option('wedding_dancing_shortname', 'Dance Floor'),
             ],
         ],
-        'form' => [ 
+        'form' => [
             'title' => get_option('wedding_form_title', 'RSVP'),
             'subtitle' =>get_option('wedding_form_subtitle', 'We Hope You Can Make It'),
         ]
@@ -116,7 +116,7 @@ function wedding_get_stories() {
         'orderby' => 'menu_order',
         'order' => 'ASC',
     ]);
-    
+
     $stories = [];
     foreach ($posts as $post) {
         $stories[] = [
@@ -126,6 +126,6 @@ function wedding_get_stories() {
             'image' => get_the_post_thumbnail_url($post->ID, 'large') ?: '',
         ];
     }
-    
+
     return rest_ensure_response($stories);
 }

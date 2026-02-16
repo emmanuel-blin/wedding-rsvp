@@ -41,7 +41,7 @@ function wedding_add_admin_menu() {
         'dashicons-heart',
         30
     );
-    
+
     add_submenu_page(
         'wedding-settings',
         'Settings',
@@ -60,7 +60,7 @@ function wedding_register_settings() {
     register_setting('wedding_settings', 'wedding_hero_image');
     register_setting('wedding_settings', 'wedding_hero_subtitle');
     register_setting('wedding_settings', 'wedding_hero_title');
-    
+
     register_setting('wedding_settings', 'wedding_date');
     register_setting('wedding_settings', 'wedding_time');
 

@@ -12,9 +12,9 @@
  * Text Domain: Wedding RSVP
  */
 
-  if ( ! defined( 'ABSPATH' ) ) {
-    exit; // Exit if accessed directly
-  }
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
 
 // Maybe needed cache control : no-cache, To be checked
 // ============================================================================

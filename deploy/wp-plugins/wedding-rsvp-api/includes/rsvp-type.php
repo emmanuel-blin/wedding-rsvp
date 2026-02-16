@@ -48,8 +48,8 @@ add_action('manage_wedding_rsvp_posts_custom_column', function($column, $post_id
     switch ($column) {
         case 'attendance':
             $status = get_post_meta($post_id, 'attendance', true);
-            echo $status === 'attending' 
-                ? '<span style="color: green;">✓ Attending</span>' 
+            echo $status === 'attending'
+                ? '<span style="color: green;">✓ Attending</span>'
                 : '<span style="color: red;">✗ Declined</span>';
             break;
         case 'guest_count':
