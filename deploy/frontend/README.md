@@ -48,14 +48,15 @@ frontend/
 │   │   ├── Hero.jsx           # Hero section with countdown
 │   │   ├── OurStory.jsx       # Story/Photo grid section
 │   │   ├── Timeline.jsx       # Event schedule
-│   │   ├── CityHall.jsx      # City Hall venue section
-│   │   ├── VenueLocation.jsx # Reception venue section
-│   │   ├── Location.jsx      # Map & directions
-│   │   └── RSVPForm.jsx      # Multi-step RSVP form
+│   │   ├── CityHall.jsx       # City Hall venue section
+│   │   ├── SleepLocation.jsx  # Link to AirBnB and Booking.com
+│   │   ├── VenueLocation.jsx  # Reception venue section
+│   │   ├── Location.jsx       # Map & directions
+│   │   └── RSVPForm.jsx       # Multi-step RSVP form
 │   ├── utils/
-│   │   └── translations.js   # i18n support
+│   │   └── translations.js    # i18n support
 │   ├── App.jsx
-│   └── index.css             # Tailwind v4 theme
+│   └── index.css              # Tailwind v4 theme
 └── index.html
 ```
 
@@ -121,6 +122,29 @@ This starts: MySQL, WordPress, and React frontend containers.
 
 ---
 
+## Components
+
+### Hero.jsx
+Hero zone, contains a background image that can be customized in wp-admin Wedding -> settings general tab, so your guests will know who you are
+
+### OurStory.jsx
+Story telling section, can be customized in wp-admin Wedding -> settings -> all stories, those are post type, like a normal wordpress post, they can have thumbnails, titles and texts. Tell your story get crative.
+
+### Timeline.jsx
+Timeline section, can be customized in the wp-admin wedding -> settings Timeline tab, this will let you set how you planned the event. we all know it won't go as you planned it but at list it is there
+
+### CityHall.jsx / VenueLocation.jsx
+Google map frame with the address of the city hall and venue location, some indications for the access, parking... buttons to add the address to waze / apple maps / google maps, so people should not be lost, they will be but at list you know where they can find the address.
+
+### Location.jsx
+just to load both previous components.
+
+### SleepLocation.jsx
+Section, where the guests can easaly get to rent a place to stay after the event, even thought we all hope the guests should not take the road after having too much wine and dancing
+
+### RSVPForm.jsx
+The RSVP form, this will be the one that will let you know who is comming (/or is not comming (soon<sup>TM</sup>)), for now it is a fixed form, meaning it's content and steps is hard coded, but you got the name of the guest if they come with a +1 or more, they can let you know if they have a specific regime or food alergies, what kind of music they want. I'm looking into make this form configurable in the wp-admin wedding plugin. This form needs a code that can be passed in the URL `/?code=TEST123` for exemple, this code can be set in wp-admin -> settings tab RSVP, this is to avoid litle smart a** to spam or worst your wordpress, it is set to send an email to with the infos to the admin email.
+
 ## Troubleshooting
 
 ### REST API returns 404
@@ -143,11 +167,6 @@ If the `/wp-json/` endpoints return a 404 error:
 After updating WordPress settings, hard refresh the React app or clear browser cache.
 
 ---
-
-### TODO
-1. Create a simple API utility to remove duplication
-2. Create a proper useWeddingData hook for better abstraction
-3. Leave it as-is since it's already working well
 
 ## License
 
