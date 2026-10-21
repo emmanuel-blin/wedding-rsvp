@@ -36,7 +36,7 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       # Admin credentials for automatic WordPress installation
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER:-admin}
-      WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD:-admin123}
+      WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD:?Set WORDPRESS_ADMIN_PASSWORD in .env}
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
       WORDPRESS_SITE_TITLE: ${WORDPRESS_SITE_TITLE:-Headless WordPress}
       WP_HOME: ${WP_HOME:-http://localhost:8080}
@@ -78,6 +78,7 @@ services:
       - VITE_WP_GRAPHQL_URL=${VITE_WP_GRAPHQL_URL:-http://localhost:8080/graphql}
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - HOST_URL=${HOST_URL:-localhost}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -99,11 +100,11 @@ services:
     depends_on:
       - db
     ports:
-      - "8081:80"
+      # Localhost only: reach it through an SSH tunnel, never expose it publicly
+      - "127.0.0.1:8081:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_ARBITRARY: 1
     networks:
       - wordpress_network
 

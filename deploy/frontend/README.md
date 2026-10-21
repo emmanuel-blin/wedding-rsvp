@@ -143,6 +143,8 @@ just to load both previous components.
 Section, where the guests can easaly get to rent a place to stay after the event, even thought we all hope the guests should not take the road after having too much wine and dancing
 
 ### RSVPForm.jsx
+**Flow:** access code → guest names → attendance → meal preferences → review → success. Names are collected *before* asking about attendance, so clicking "Regretfully decline" submits the RSVP immediately (with the names) and shows the "we will miss you" screen. If a submission fails, an error is shown and the guest can retry instead of seeing a fake success screen.
+
 The RSVP form, this will be the one that will let you know who is comming (/or is not comming (soon<sup>TM</sup>)), for now it is a fixed form, meaning it's content and steps is hard coded, but you got the name of the guest if they come with a +1 or more, they can let you know if they have a specific regime or food alergies, what kind of music they want. I'm looking into make this form configurable in the wp-admin wedding plugin. This form needs a code that can be passed in the URL `/?code=TEST123` for exemple, this code can be set in wp-admin -> settings tab RSVP, this is to avoid litle smart a** to spam or worst your wordpress, it is set to send an email to with the infos to the admin email.
 
 ## Troubleshooting

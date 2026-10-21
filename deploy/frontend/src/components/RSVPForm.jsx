@@ -4,8 +4,8 @@ import '../utils/translations';
 
 const STEPS = {
     CODE_ENTRY: 0,
-    ATTENDANCE: 1,
-    GUESTS: 2,
+    GUESTS: 1,
+    ATTENDANCE: 2,
     PREFERENCES: 3,
     REVIEW: 4,
     SUCCESS: 5,
@@ -42,7 +42,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             });
             if (res.ok) {
                 setFormData(prev => ({ ...prev, accessCode: initialCode.toUpperCase() }));
-                setCurrentStep(STEPS.ATTENDANCE);
+                setCurrentStep(STEPS.GUESTS);
             }
             } catch (err) {
             console.error('Initial code validation failed');
@@ -68,7 +68,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
         if (response.ok) {
             setFormData(prev => ({ ...prev, accessCode: prev.accessCode.toUpperCase() }));
-            setCurrentStep(STEPS.ATTENDANCE);
+            setCurrentStep(STEPS.GUESTS);
         } else {
             setError(t('rsvp.error_code'));
         }
@@ -79,10 +79,16 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         }
     };
 
-    // Handle attendance selection
+    // Handle attendance selection (guest names are already filled at this point,
+    // so a decline can be submitted right away)
     const handleAttendance = (attending) => {
-        setFormData(prev => ({ ...prev, attendance: attending }));
-        setCurrentStep(attending ? STEPS.GUESTS : STEPS.DECLINED);
+        const data = { ...formData, attendance: attending };
+        setFormData(data);
+        if (attending) {
+            setCurrentStep(STEPS.PREFERENCES);
+        } else {
+            submitRSVP(data, STEPS.DECLINED);
+        }
     };
 
     // Add guest
@@ -114,7 +120,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
     };
 
     // Submit RSVP
-    const submitRSVP = async () => {
+    const submitRSVP = async (data = formData, nextStep = STEPS.SUCCESS) => {
         setIsLoading(true);
         setError('');
 
@@ -124,17 +130,16 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(data),
         });
 
         if (response.ok) {
-            setCurrentStep(STEPS.SUCCESS);
+            setCurrentStep(nextStep);
         } else {
             throw new Error('Submission failed');
         }
         } catch (err) {
-        // For demo purposes, show success anyway
-        setCurrentStep(STEPS.SUCCESS);
+        setError(t('rsvp.error_general'));
         } finally {
         setIsLoading(false);
         }
@@ -155,7 +160,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             </div>
 
             {/* Progress Bar */}
-            {currentStep >= STEPS.ATTENDANCE && currentStep <= STEPS.REVIEW && (
+            {currentStep >= STEPS.GUESTS && currentStep <= STEPS.REVIEW && (
             <div className="mb-8">
                 <div className="flex justify-between text-xs text-gray-400 mb-2">
                 <span>{t('rsvp.step_progress', { currentProgress, totalSteps })}</span>
@@ -201,7 +206,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 </div>
             )}
 
-            {/* Step 1: Attendance */}
+            {/* Step 2: Attendance (after guests, so a decline can be submitted with names) */}
             {currentStep === STEPS.ATTENDANCE && (
                 <div className="text-center">
                 <h3 className="font-serif text-2xl text-burgundy mb-4">{t('rsvp.will_you_join_us')}?</h3>
@@ -209,21 +214,32 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                     onClick={() => handleAttendance(true)}
-                    className="px-12 py-4 bg-gold text-white font-medium uppercase tracking-wider hover:bg-gold/90 transition-all hover:scale-105 rounded-lg"
+                    disabled={isLoading}
+                    className="px-12 py-4 bg-gold text-white font-medium uppercase tracking-wider hover:bg-gold/90 transition-all hover:scale-105 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                     {t('rsvp.joyfully_accept')}
                     </button>
                     <button
                     onClick={() => handleAttendance(false)}
-                    className="px-12 py-4 border-2 border-gray-300 text-gray-600 uppercase tracking-wider hover:border-burgundy hover:text-burgundy transition-colors rounded-lg"
+                    disabled={isLoading}
+                    className="px-12 py-4 border-2 border-gray-300 text-gray-600 uppercase tracking-wider hover:border-burgundy hover:text-burgundy transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                     {t('rsvp.regretfully_decline')}
+                    </button>
+                </div>
+                <div className="flex justify-start mt-8">
+                    <button
+                    onClick={() => setCurrentStep(STEPS.GUESTS)}
+                    disabled={isLoading}
+                    className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
+                    >
+                    ← {t('common.back')}
                     </button>
                 </div>
                 </div>
             )}
 
-            {/* Step 2: Guests */}
+            {/* Step 1: Guests */}
             {currentStep === STEPS.GUESTS && (
                 <div>
                 <h3 className="font-serif text-2xl text-burgundy mb-6 text-center">{t('rsvp.who_will_be_attending')}?</h3>
@@ -269,15 +285,9 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     {t('rsvp.add_guest')}
                 </button>
 
-                <div className="flex justify-between">
+                <div className="flex justify-end">
                     <button
                     onClick={() => setCurrentStep(STEPS.ATTENDANCE)}
-                    className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
-                    >
-                    ← {t('common.back')}
-                    </button>
-                    <button
-                    onClick={() => setCurrentStep(STEPS.PREFERENCES)}
                     disabled={!formData.guests[0].name}
                     className="px-8 py-3 bg-burgundy text-white uppercase tracking-wider hover:bg-burgundy/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                     >
@@ -344,7 +354,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
                 <div className="flex justify-between">
                     <button
-                    onClick={() => setCurrentStep(STEPS.GUESTS)}
+                    onClick={() => setCurrentStep(STEPS.ATTENDANCE)}
                     className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
                     >
                     ← {t('common.back')}
@@ -395,7 +405,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     ← {t('rsvp.edit')}
                     </button>
                     <button
-                    onClick={submitRSVP}
+                    onClick={() => submitRSVP()}
                     disabled={isLoading}
                     className="px-8 py-3 bg-gold text-white uppercase tracking-wider hover:bg-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                     >
