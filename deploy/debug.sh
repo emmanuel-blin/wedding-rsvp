@@ -14,6 +14,9 @@ log_ok() { echo -e "${GREEN}✓${NC} $1"; }
 log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 log_error() { echo -e "${RED}✗${NC} $1"; }
 
+# Read a value from .env (not sourced: some values contain spaces)
+env_get() { grep -E "^$1=" .env 2>/dev/null | head -1 | cut -d= -f2-; }
+
 echo ""
 echo "=========================================="
 echo "CONTAINER STATUS CHECK"
@@ -47,7 +50,7 @@ if docker ps | grep -q wordpress_db; then
     fi
 
     # Test connection
-    if docker exec wordpress_db mysqladmin ping -h localhost -uroot -p"${MYSQL_ROOT_PASSWORD:-rootpassword123}" &>/dev/null; then
+    if docker exec wordpress_db mysqladmin ping -h localhost -uroot -p"$(env_get MYSQL_ROOT_PASSWORD)" &>/dev/null; then
         log_ok "MySQL responding to ping"
     else
         log_error "MySQL not responding"
@@ -86,7 +89,7 @@ if docker ps | grep -q wordpress_backend; then
     fi
 
     # Check database connection from WordPress
-    if docker exec wordpress_backend mysql -h db -u wordpress -p"${MYSQL_PASSWORD:-wordpress123}" -e "SELECT 1" wordpress &>/dev/null; then
+    if docker exec wordpress_backend mysql -h db -u "$(env_get MYSQL_USER)" -p"$(env_get MYSQL_PASSWORD)" -e "SELECT 1" "$(env_get MYSQL_DATABASE)" &>/dev/null; then
         log_ok "WordPress can connect to database"
     else
         log_error "WordPress cannot connect to database"
@@ -183,7 +186,7 @@ echo "   docker compose logs -f [wordpress|db|frontend]"
 echo ""
 echo "C. Manual WordPress install:"
 echo "   docker exec -it wordpress_backend bash"
-echo "   wp core install --url='http://localhost:8080' --title='Headless WP' --admin_user='admin' --admin_password='admin123' --admin_email='admin@example.com' --allow-root"
+echo "   wp core install --url='http://localhost:8080' --title='Headless WP' --admin_user='admin' --admin_password='<WORDPRESS_ADMIN_PASSWORD from .env>' --admin_email='admin@example.com' --allow-root"
 echo ""
 echo "D. Complete reset (DELETES ALL DATA):"
 echo "   docker compose down -v"

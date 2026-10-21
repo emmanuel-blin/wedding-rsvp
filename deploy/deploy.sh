@@ -15,6 +15,16 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+# Compose requires the passwords from .env (no built-in defaults anymore)
+if [ ! -f .env ]; then
+    log_error ".env not found. Run: cp .env.example .env, then edit it."
+    exit 1
+fi
+if grep -v '^[[:space:]]*#' .env | grep -q "CHANGE_ME"; then
+    log_error ".env still contains CHANGE_ME placeholders. Set real passwords first."
+    exit 1
+fi
+
 # Check if phpMyAdmin is enabled in docker-compose.yml
 PHPmyADMIN_ENABLED=false
 if grep -q "^[[:space:]]*phpmyadmin:" docker-compose.yml 2>/dev/null; then
@@ -158,7 +168,7 @@ echo "  - WordPress API:  http://localhost:8080/wp-json/wp/v2/"
 echo "  - GraphQL *:      http://localhost:8080/graphql"
 echo "  - React Frontend: http://localhost:5173"
 if [ "$PHPmyADMIN_ENABLED" = true ]; then
-    echo "  - phpMyAdmin:     http://localhost:8081"
+    echo "  - phpMyAdmin:     http://localhost:8081 (127.0.0.1 only, use an SSH tunnel from another machine)"
 fi
 echo "  * GraphQL requires setting WORDPRESS_ENABLE_GRAPHQL=true"
 if [ "$PHPmyADMIN_ENABLED" = false ]; then
@@ -166,8 +176,7 @@ if [ "$PHPmyADMIN_ENABLED" = false ]; then
 fi
 echo ""
 echo "WordPress Admin Credentials:"
-echo "  - Username: ${WORDPRESS_ADMIN_USER:-admin}"
-echo "  - Password: ${WORDPRESS_ADMIN_PASSWORD:-admin123}"
+echo "  - Username / password: WORDPRESS_ADMIN_USER / WORDPRESS_ADMIN_PASSWORD in .env"
 echo ""
 echo "Troubleshooting:"
 echo "  - Run ./debug.sh to diagnose any issues"

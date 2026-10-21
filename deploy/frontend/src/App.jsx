@@ -88,10 +88,10 @@ function App() {
 
     const coupleNames = settings?.coupleNames || ['Emma', 'John'];
     const weddingDate = settings?.weddingDate || '2026-09-26T14:00:00';
-    const heroSubtitle = settings?.hero.subtitle || 'Together with their families';
-    const heroTitle = settings?.hero.title || 'Request the pleasure of your company';
-    const locationTitle = settings?.location.title || 'Location';
-    const locationSubtitle = settings?.location.subtitle || 'Find Your Way';
+    const heroSubtitle = settings?.hero?.subtitle || 'Together with their families';
+    const heroTitle = settings?.hero?.title || 'Request the pleasure of your company';
+    const locationTitle = settings?.location?.title || 'Location';
+    const locationSubtitle = settings?.location?.subtitle || 'Find Your Way';
 
     return (
         <div className="min-h-screen bg-cream">

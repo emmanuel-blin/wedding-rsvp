@@ -10,6 +10,7 @@ export default defineConfig({
         port: 5173,
         watch: {
         usePolling: true
-        }
+        },
+        allowedHosts: process.env.HOST_URL ? [process.env.HOST_URL] : []
     }
 })

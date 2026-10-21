@@ -36,7 +36,7 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
     # Install WordPress with admin user
     # Using environment variables or defaults
     WP_ADMIN_USER=${WORDPRESS_ADMIN_USER:-admin}
-    WP_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD:-admin123}
+    WP_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD:?WORDPRESS_ADMIN_PASSWORD is not set}
     WP_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
     WP_SITE_TITLE=${WORDPRESS_SITE_TITLE:-Headless WordPress}
 
@@ -51,7 +51,6 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
 
     echo "WordPress installed successfully!"
     echo "Admin User: $WP_ADMIN_USER"
-    echo "Admin Password: $WP_ADMIN_PASSWORD"
 else
     echo "WordPress already installed, checking for URL updates..."
 
@@ -162,4 +161,4 @@ fi
 echo ""
 echo "Admin Credentials:"
 echo "  User:     ${WORDPRESS_ADMIN_USER:-admin}"
-echo "  Password: ${WORDPRESS_ADMIN_PASSWORD:-admin123}"
+echo "  Password: (WORDPRESS_ADMIN_PASSWORD in .env)"
