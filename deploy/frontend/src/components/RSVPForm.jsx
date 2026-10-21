@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../utils/translations';
+import ProgressBar from './ProgressBar';
+
+// Used when no meal options are set in the WordPress admin.
+// Stable values sent to the API; labels come from translations (rsvp.meal_options.<key>)
+const DEFAULT_MEAL_OPTIONS = ['meat', 'fish', 'gluten_free', 'vegetarian', 'vegan'];
 
 const STEPS = {
     CODE_ENTRY: 0,
@@ -16,6 +21,12 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const { t } = useTranslation();
+
+    // Meal options from the WordPress admin (shown as written), else the translated defaults
+    const customMealOptions = formHead?.mealOptions?.length ? formHead.mealOptions : null;
+    const mealOptions = customMealOptions || DEFAULT_MEAL_OPTIONS;
+    const mealLabel = (option) => (customMealOptions ? option : t(`rsvp.meal_options.${option}`));
+
     const [currentStep, setCurrentStep] = useState(STEPS.CODE_ENTRY);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -44,7 +55,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 setFormData(prev => ({ ...prev, accessCode: initialCode.toUpperCase() }));
                 setCurrentStep(STEPS.GUESTS);
             }
-            } catch (err) {
+            } catch {
             console.error('Initial code validation failed');
             } finally {
             setIsLoading(false);
@@ -72,7 +83,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         } else {
             setError(t('rsvp.error_code'));
         }
-        } catch (err) {
+        } catch {
         setError(t('rsvp.error_general'));
         } finally {
         setIsLoading(false);
@@ -138,7 +149,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         } else {
             throw new Error('Submission failed');
         }
-        } catch (err) {
+        } catch {
         setError(t('rsvp.error_general'));
         } finally {
         setIsLoading(false);
@@ -161,17 +172,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
             {/* Progress Bar */}
             {currentStep >= STEPS.GUESTS && currentStep <= STEPS.REVIEW && (
-            <div className="mb-8">
-                <div className="flex justify-between text-xs text-gray-400 mb-2">
-                <span>{t('rsvp.step_progress', { currentProgress, totalSteps })}</span>
-                </div>
-                <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                    className="h-full bg-gold transition-all duration-500"
-                    style={{ width: `${(currentProgress / totalSteps) * 100}%` }}
-                ></div>
-                </div>
-            </div>
+            <ProgressBar current={currentProgress} total={totalSteps} />
             )}
 
             {/* Error Message */}
@@ -305,7 +306,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="mb-6">
                     <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.meal_preferences_label')}</label>
                     <div className="grid grid-cols-2 gap-3">
-                    {['Meat', 'Fish', 'Gluten Free', 'Vegetarian', 'Vegan'].map((option) => { // to be add to settings api
+                    {mealOptions.map((option) => {
                         const isSelected = formData.mealPreferences.includes(option);
                         return (
                         <button
@@ -323,7 +324,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                             }`}
                         >
                             {isSelected && <span>✓</span>}
-                            {option}
+                            {mealLabel(option)}
                         </button>
                         );
                     })}
@@ -381,7 +382,9 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     </div>
                     <div className="flex justify-between py-3 border-b border-gray-200">
                     <span className="text-gray-500">{t('rsvp.meal_preferences')}</span>
-                    <span className="text-burgundy font-medium">{formData.mealPreferences.length > 0 ? formData.mealPreferences.join(', ') : 'None'}</span>
+                    <span className="text-burgundy font-medium">{formData.mealPreferences.length > 0
+                        ? formData.mealPreferences.map(mealLabel).join(', ')
+                        : t('common.none')}</span>
                     </div>
                     {formData.dietaryRestrictions && (
                     <div className="flex justify-between py-3 border-b border-gray-200">

@@ -7,9 +7,9 @@ export default function Location({ venue: apiVenue }) {
 
     return (
         <VenueLocation
-        title={venue.name || "Reception Venue"}
-        address={venue.address || "Venue Address"}
-        description={venue.description || "Following the ceremony, join us for a night of celebration, dinner, and dancing."}
+        title={venue.name || t('defaults.venue_name')}
+        address={venue.address || t('defaults.venue_address')}
+        description={venue.description || t('defaults.venue_description')}
         gettingThere={venue.gettingThere}
         mapOrder="ltr"
         />

@@ -332,6 +332,20 @@
             </table>
 
             <div class="section-header">
+                <span class="section-icon">🍽️</span>
+                <h3>Meal Options</h3>
+            </div>
+            <table class="form-table">
+                <tr>
+                    <th><label for="wedding_meal_options">Options</label></th>
+                    <td>
+                        <textarea id="wedding_meal_options" name="wedding_meal_options" rows="6" class="large-text" placeholder="Meat&#10;Fish&#10;Gluten Free&#10;Vegetarian&#10;Vegan"><?= esc_textarea(get_option('wedding_meal_options', '')); ?></textarea>
+                        <p class="description">One option per line, shown as-is to guests (write them in the language of your site). Leave empty to use the built-in translated list: Meat, Fish, Gluten Free, Vegetarian, Vegan.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-header">
                 <span class="section-icon">🔐</span>
                 <h3>Access Codes</h3>
             </div>

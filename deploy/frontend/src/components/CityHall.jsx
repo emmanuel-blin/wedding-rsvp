@@ -7,9 +7,9 @@ export default function CityHall({ cityHall: apiCityHall }) {
 
     return (
         <VenueLocation
-        title={cityHall.name || "Mairie"}
-        address={cityHall.address || "Hôtel de Ville"}
-        description={cityHall.description || "Join us for the civil ceremony at the local City Hall."}
+        title={cityHall.name || t('defaults.city_hall_name')}
+        address={cityHall.address || t('defaults.city_hall_address')}
+        description={cityHall.description || t('defaults.city_hall_description')}
         gettingThere={cityHall.gettingThere}
         mapOrder="rtl"
         />
