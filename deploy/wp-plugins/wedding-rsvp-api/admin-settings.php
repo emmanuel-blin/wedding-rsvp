@@ -337,10 +337,35 @@
             </div>
             <table class="form-table">
                 <tr>
+                    <th><label for="wedding_ask_meal_choice">Ask for a meal choice</label></th>
+                    <td>
+                        <input type="hidden" name="wedding_ask_meal_choice" value="0">
+                        <label>
+                            <input type="checkbox" id="wedding_ask_meal_choice" name="wedding_ask_meal_choice" value="1" <?= get_option('wedding_ask_meal_choice', '1') === '1' ? 'checked' : ''; ?>>
+                            Let guests pick from the options below
+                        </label>
+                        <p class="description">Untick if the menu is already decided: guests will only be asked for allergies / dietary notes. Tick it again if you haven't chosen the menu yet and want to let guests decide.</p>
+                    </td>
+                </tr>
+                <tr>
                     <th><label for="wedding_meal_options">Options</label></th>
                     <td>
                         <textarea id="wedding_meal_options" name="wedding_meal_options" rows="6" class="large-text" placeholder="Meat&#10;Fish&#10;Gluten Free&#10;Vegetarian&#10;Vegan"><?= esc_textarea(get_option('wedding_meal_options', '')); ?></textarea>
-                        <p class="description">One option per line, shown as-is to guests (write them in the language of your site). Leave empty to use the built-in translated list: Meat, Fish, Gluten Free, Vegetarian, Vegan.</p>
+                        <p class="description">One option per line, shown as-is to guests (write them in the language of your site). Leave empty to use the built-in translated list: Meat, Fish, Gluten Free, Vegetarian, Vegan. With a fixed menu you can keep only the special diets, e.g. just "Vegetarian" and "Vegan".</p>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="section-header">
+                <span class="section-icon">⚠️</span>
+                <h3>Allergens</h3>
+            </div>
+            <table class="form-table">
+                <tr>
+                    <th><label for="wedding_allergens">Options</label></th>
+                    <td>
+                        <textarea id="wedding_allergens" name="wedding_allergens" rows="6" class="large-text" placeholder="Gluten&#10;Milk&#10;Eggs&#10;Peanuts"><?= esc_textarea(get_option('wedding_allergens', '')); ?></textarea>
+                        <p class="description">Buttons guests can tick, one per line, shown as written. Leave empty to use the built-in translated list: Gluten, Milk, Eggs, Peanuts, Tree nuts, Fish, Shellfish, Soy, Sesame. Guests can also describe any other allergy in a free text field.</p>
                     </td>
                 </tr>
             </table>

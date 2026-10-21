@@ -102,16 +102,18 @@ function wedding_get_settings() {
         'form' => [
             'title' => get_option('wedding_form_title', 'RSVP'),
             'subtitle' =>get_option('wedding_form_subtitle', 'We Hope You Can Make It'),
-            'mealOptions' => wedding_get_meal_options(),
+            'askMealChoice' => get_option('wedding_ask_meal_choice', '1') === '1',
+            'mealOptions' => wedding_get_option_lines('wedding_meal_options'),
+            'allergens' => wedding_get_option_lines('wedding_allergens'),
         ]
     ]);
 }
 
 /**
- * Helper: Meal options configured in the admin, one per line (empty = frontend defaults)
+ * Helper: List configured in the admin, one item per line (empty list = frontend defaults)
  */
-function wedding_get_meal_options() {
-    $lines = preg_split('/\r\n|\r|\n/', (string) get_option('wedding_meal_options', ''));
+function wedding_get_option_lines($option) {
+    $lines = preg_split('/\r\n|\r|\n/', (string) get_option($option, ''));
     return array_values(array_filter(array_map('trim', $lines), 'strlen'));
 }
 

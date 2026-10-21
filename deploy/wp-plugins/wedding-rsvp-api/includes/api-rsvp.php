@@ -64,6 +64,8 @@ function wedding_handle_rsvp_submission($request) {
     // The form sends the selected meal options as an array of keys (e.g. ["meat", "vegan"])
     $meal_options = is_array($params['mealPreferences'] ?? null) ? $params['mealPreferences'] : [];
     $meal_preference = implode(', ', array_filter(array_map('sanitize_text_field', $meal_options)));
+    $allergen_options = is_array($params['allergens'] ?? null) ? $params['allergens'] : [];
+    $allergens = implode(', ', array_filter(array_map('sanitize_text_field', $allergen_options)));
     $dietary_restrictions = sanitize_textarea_field($params['dietaryRestrictions'] ?? '');
     $song_request = sanitize_text_field($params['songRequest'] ?? '');
 
@@ -87,6 +89,7 @@ function wedding_handle_rsvp_submission($request) {
             'guests' => json_encode($params['guests']),
             'guest_count' => count($guest_names),
             'meal_preference' => $meal_preference,
+            'allergens' => $allergens,
             'dietary_restrictions' => $dietary_restrictions,
             'song_request' => $song_request,
             'submitted_at' => current_time('mysql'),
@@ -106,7 +109,12 @@ function wedding_handle_rsvp_submission($request) {
     $message .= "Status: " . ($attendance ? 'Attending' : 'Declined') . "\n";
     if ($attendance) {
         $message .= "Guest count: " . count($guest_names) . "\n";
-        $message .= "Meal preference: {$meal_preference}\n";
+        if ($meal_preference) {
+            $message .= "Meal preference: {$meal_preference}\n";
+        }
+        if ($allergens) {
+            $message .= "Allergens: {$allergens}\n";
+        }
         if ($dietary_restrictions) {
             $message .= "Dietary notes: {$dietary_restrictions}\n";
         }
