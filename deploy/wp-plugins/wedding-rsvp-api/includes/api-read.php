@@ -102,8 +102,17 @@ function wedding_get_settings() {
         'form' => [
             'title' => get_option('wedding_form_title', 'RSVP'),
             'subtitle' =>get_option('wedding_form_subtitle', 'We Hope You Can Make It'),
+            'mealOptions' => wedding_get_meal_options(),
         ]
     ]);
+}
+
+/**
+ * Helper: Meal options configured in the admin, one per line (empty = frontend defaults)
+ */
+function wedding_get_meal_options() {
+    $lines = preg_split('/\r\n|\r|\n/', (string) get_option('wedding_meal_options', ''));
+    return array_values(array_filter(array_map('trim', $lines), 'strlen'));
 }
 
 /**

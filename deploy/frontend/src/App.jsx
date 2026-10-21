@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import packageJson from '../package.json';
 import Hero from './components/Hero';
 import OurStory from './components/OurStory';
@@ -8,59 +8,16 @@ import SleepLocation from './components/SleepLocation';
 import Timeline from './components/Timeline';
 import RSVPForm from './components/RSVPForm';
 import { useTranslation } from 'react-i18next';
+import useWeddingData from './hooks/useWeddingData';
 import './utils/translations';
 import './App.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-
 function App() {
     const rsvpRef = useRef(null);
-    const [accessCode, setAccessCode] = useState(null);
-    const [settings, setSettings] = useState(null);
-    const [stories, setStories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    // Access code from the invitation URL (?code=...)
+    const [accessCode] = useState(() => new URLSearchParams(window.location.search).get('code'));
+    const { settings, stories, loading, error } = useWeddingData();
     const { t } = useTranslation();
-
-  // Fetch settings and stories from WordPress
-    useEffect(() => {
-        const fetchData = async () => {
-        try {
-            const [settingsRes, storiesRes] = await Promise.all([
-            fetch(`${API_BASE}/settings`),
-            fetch(`${API_BASE}/stories`),
-            ]);
-
-            if (settingsRes.ok) {
-            const settingsData = await settingsRes.json();
-            setSettings(settingsData);
-            } else {
-            throw new Error('Failed to load settings');
-            }
-
-            if (storiesRes.ok) {
-            const storiesData = await storiesRes.json();
-            setStories(storiesData);
-            }
-        } catch (error) {
-            console.error('Failed to fetch wedding data:', error);
-            setError(true);
-        } finally {
-            setLoading(false);
-        }
-        };
-
-        fetchData();
-    }, []);
-
-  // Check for access code in URL
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (code) {
-        setAccessCode(code);
-        }
-    }, []);
 
     const scrollToRSVP = () => {
         rsvpRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -88,10 +45,10 @@ function App() {
 
     const coupleNames = settings?.coupleNames || ['Emma', 'John'];
     const weddingDate = settings?.weddingDate || '2026-09-26T14:00:00';
-    const heroSubtitle = settings?.hero?.subtitle || 'Together with their families';
-    const heroTitle = settings?.hero?.title || 'Request the pleasure of your company';
-    const locationTitle = settings?.location?.title || 'Location';
-    const locationSubtitle = settings?.location?.subtitle || 'Find Your Way';
+    const heroSubtitle = settings?.hero?.subtitle || t('defaults.hero_subtitle');
+    const heroTitle = settings?.hero?.title || t('defaults.hero_title');
+    const locationTitle = settings?.location?.title || t('sections.location');
+    const locationSubtitle = settings?.location?.subtitle || t('sections.location_sub');
 
     return (
         <div className="min-h-screen bg-cream">

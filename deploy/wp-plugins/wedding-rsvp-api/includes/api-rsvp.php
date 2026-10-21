@@ -61,7 +61,9 @@ function wedding_handle_rsvp_submission($request) {
     // Sanitize data
     $attendance = sanitize_text_field($params['attendance'] ?? '');
     $guests = array_map('sanitize_text_field', $params['guests'] ?? []);
-    $meal_preference = sanitize_text_field($params['mealPreference'] ?? '');
+    // The form sends the selected meal options as an array of keys (e.g. ["meat", "vegan"])
+    $meal_options = is_array($params['mealPreferences'] ?? null) ? $params['mealPreferences'] : [];
+    $meal_preference = implode(', ', array_filter(array_map('sanitize_text_field', $meal_options)));
     $dietary_restrictions = sanitize_textarea_field($params['dietaryRestrictions'] ?? '');
     $song_request = sanitize_text_field($params['songRequest'] ?? '');
 

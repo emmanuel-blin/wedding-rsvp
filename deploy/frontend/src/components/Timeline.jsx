@@ -1,18 +1,22 @@
-export default function Timeline({ timeline }) {
+import { useTranslation } from 'react-i18next';
+import '../utils/translations';
 
-    const displayTimelineSubtitle = timeline?.subtitle || 'The schedule';
-    const displayTimelineTitle = timeline?.title || 'Timeline';
-    const displayTimelineCityHallName = timeline?.cityHall.name || 'City Hall';
-    const displayTimelineCityHallShortname = timeline?.cityHall.shortname;
-    const displayTimelinePhotoTime = timeline?.photo.time || '15:00';
-    const displayTimelinePhotoName = timeline?.photo.name || 'Photo';
-    const displayTimelinePhotoShortname = timeline?.photo.shortname;
-    const displayTimelineDinnerTime = timeline?.dinner.time || '17:00';
-    const displayTimelineDinnerName = timeline?.dinner.name || 'Dinner';
-    const displayTimelineDinnerShortname = timeline?.dinner.shortname;
-    const displayTimelineDancingTime = timeline?.dancing.time || '19:00';
-    const displayTimelineDancingName = timeline?.dancing.name || 'Dancing';
-    const displayTimelineDancingShortname = timeline?.dancing.shortname;
+export default function Timeline({ timeline }) {
+    const { t } = useTranslation();
+
+    const displayTimelineSubtitle = timeline?.subtitle || t('defaults.timeline_subtitle');
+    const displayTimelineTitle = timeline?.title || t('defaults.timeline_title');
+    const displayTimelineCityHallName = timeline?.cityHall?.name || t('defaults.timeline_city_hall');
+    const displayTimelineCityHallShortname = timeline?.cityHall?.shortname;
+    const displayTimelinePhotoTime = timeline?.photo?.time || '15:00';
+    const displayTimelinePhotoName = timeline?.photo?.name || t('defaults.timeline_photo');
+    const displayTimelinePhotoShortname = timeline?.photo?.shortname;
+    const displayTimelineDinnerTime = timeline?.dinner?.time || '17:00';
+    const displayTimelineDinnerName = timeline?.dinner?.name || t('defaults.timeline_dinner');
+    const displayTimelineDinnerShortname = timeline?.dinner?.shortname;
+    const displayTimelineDancingTime = timeline?.dancing?.time || '19:00';
+    const displayTimelineDancingName = timeline?.dancing?.name || t('defaults.timeline_dancing');
+    const displayTimelineDancingShortname = timeline?.dancing?.shortname;
 
     const events = [
         {

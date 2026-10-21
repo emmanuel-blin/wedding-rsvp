@@ -33,8 +33,8 @@ function calculateTimeLeft(weddingDate) {
 
     const displayNames = coupleNames || ['Emma', 'John'];
     const backgroundImage = heroImage || DEFAULT_HERO_IMAGE;
-    const displayHeroSubtitle = heroSubtitle || 'Together with their families';
-    const displayHeroTitle = heroTitle || 'Request the pleasure of your company';
+    const displayHeroSubtitle = heroSubtitle || t('defaults.hero_subtitle');
+    const displayHeroTitle = heroTitle || t('defaults.hero_title');
     const formattedDate = new Date(weddingDate).toLocaleDateString('fr-FR', {
         day: 'numeric',
         month: 'long',

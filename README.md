@@ -185,6 +185,14 @@ Manage in WordPress Admin → Wedding Settings:
 
 ---
 
+## Meal Options
+
+Manage in WordPress Admin → Wedding Settings → RSVP → **Meal Options**: one option per line, shown to guests exactly as written (use your site's language). Leave it empty to use the built-in translated list (Meat, Fish, Gluten Free, Vegetarian, Vegan). The guest's choices are saved with the RSVP and included in the notification email.
+
+The list is returned by `GET /wp-json/wedding/v1/settings` as `form.mealOptions`.
+
+---
+
 ## Commands
 
 ```bash

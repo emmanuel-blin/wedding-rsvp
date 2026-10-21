@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next';
+import '../utils/translations';
+
 const DEFAULT_STORIES = [
     {
         title: "How We Met",
@@ -21,10 +24,11 @@ const DEFAULT_STORIES = [
     },
 ];
 
-    export default function OurStory({ stories, ourStory }) {
+export default function OurStory({ stories, ourStory }) {
+    const { t } = useTranslation();
     const displayStories = stories && stories.length > 0 ? stories : DEFAULT_STORIES;
-    const displayOurStoryTitle = ourStory?.title || 'Our Story';
-    const displayOurStorySubtitle = ourStory?.subtitle || 'The highlights';
+    const displayOurStoryTitle = ourStory?.title || t('defaults.story_title');
+    const displayOurStorySubtitle = ourStory?.subtitle || t('defaults.story_subtitle');
 
     return (
         <section className="py-16 md:py-24 bg-cream">
