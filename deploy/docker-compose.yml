@@ -12,7 +12,11 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - wordpress_network
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
@@ -54,7 +58,11 @@ services:
       - ./wp-themes/weddingrsvpblank:/var/www/html/wp-content/themes/weddingrsvpblank:ro
     entrypoint: ["/usr/local/bin/wordpress-entrypoint.sh"]
     networks:
-      - wordpress_network
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     healthcheck:
       # Check if WordPress root responds (setup may not have run yet)
       test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php", "||", "curl", "-f", "http://localhost:80/wp-json/wp/v2/"]
@@ -85,7 +93,11 @@ services:
     command: sh -c "npm install && npm run dev -- --host"
     # command: sh -c "npm install && npm run build && npm run preview -- --host --port 5173"
     networks:
-      - wordpress_network
+      - frontend_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
       interval: 30s
@@ -94,7 +106,7 @@ services:
 
   # phpMyAdmin (Optional)
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+    image: phpmyadmin/phpmyadmin:5.2
     container_name: wordpress_phpmyadmin
     restart: unless-stopped
     depends_on:
@@ -106,12 +118,20 @@ services:
       PMA_HOST: db
       PMA_PORT: 3306
     networks:
-      - wordpress_network
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
 volumes:
   db_data:
   wordpress_data:
 
 networks:
-  wordpress_network:
+  # db, wordpress and phpmyadmin: only these can reach MySQL
+  backend_net:
+    driver: bridge
+  # frontend only: the browser reaches WordPress through the published port
+  frontend_net:
     driver: bridge
