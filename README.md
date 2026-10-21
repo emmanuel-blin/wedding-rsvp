@@ -349,7 +349,7 @@ Once the site is set up you don't need it running. Stop it with `docker compose 
 ```yaml
   # phpMyAdmin (Optional) - Comment out to disable
   # phpmyadmin:
-  #   image: phpmyadmin/phpmyadmin:latest
+  #   image: phpmyadmin/phpmyadmin:5.2
   #   ...
 ```
 
@@ -393,8 +393,10 @@ docker compose up -d --force-recreate frontend wordpress
 2. **Use HTTPS** - Configure SSL certificates (or terminate TLS at the tunnel/proxy)
 3. **Backups** - Regularly backup the volumes: `docker volume ls | grep test2`
 4. **Ports** - Only the frontend (`5173`) and WordPress (`8080`) should be reachable; MySQL is not published and phpMyAdmin is bound to `127.0.0.1`. Stop phpMyAdmin when you are done with it
-5. **GraphQL** - Only enable if you need it
-6. **Frontend** - The stack runs the Vite dev server (with polling for the bind mount). That is fine for a short-lived, invite-only site; serve a static build instead if it becomes long-lived
+5. **Networks** - `db`, `wordpress` and `phpmyadmin` share `backend_net`; the frontend is alone on `frontend_net`, so it cannot reach MySQL
+6. **Resource limits** - Memory is capped per container in `docker-compose.yml` (db 512M, wordpress 512M, frontend 512M, phpmyadmin 128M) so one runaway container cannot freeze the host. Raise them if a container gets OOM-killed (`docker inspect <name> --format '{{.State.OOMKilled}}'`)
+7. **GraphQL** - Only enable if you need it
+8. **Frontend** - The stack runs the Vite dev server (with polling for the bind mount). That is fine for a short-lived, invite-only site; serve a static build instead if it becomes long-lived
 
 ## License
 

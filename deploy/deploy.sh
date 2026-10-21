@@ -47,7 +47,7 @@ IMAGES=(
 
 # Only pull phpMyAdmin image if it's enabled
 if [ "$PHPmyADMIN_ENABLED" = true ]; then
-    IMAGES+=("phpmyadmin/phpmyadmin:latest")
+    IMAGES+=("phpmyadmin/phpmyadmin:5.2")
 fi
 
 for img in "${IMAGES[@]}"; do
