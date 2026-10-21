@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../utils/translations';
 import ProgressBar from './ProgressBar';
+import ToggleGroup from './ToggleGroup';
 
 // Used when no meal options are set in the WordPress admin.
 // Stable values sent to the API; labels come from translations (rsvp.meal_options.<key>)
 const DEFAULT_MEAL_OPTIONS = ['meat', 'fish', 'gluten_free', 'vegetarian', 'vegan'];
+// Same idea for allergens (labels: rsvp.allergen_options.<key>)
+const DEFAULT_ALLERGENS = ['gluten', 'milk', 'eggs', 'peanuts', 'nuts', 'fish', 'shellfish', 'soy', 'sesame'];
 
 const STEPS = {
     CODE_ENTRY: 0,
@@ -22,10 +25,18 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const { t } = useTranslation();
 
+    // Hosts can turn the dish choice off (fixed menu): only allergies/notes are asked then
+    const askMealChoice = formHead?.askMealChoice !== false;
+
     // Meal options from the WordPress admin (shown as written), else the translated defaults
     const customMealOptions = formHead?.mealOptions?.length ? formHead.mealOptions : null;
     const mealOptions = customMealOptions || DEFAULT_MEAL_OPTIONS;
     const mealLabel = (option) => (customMealOptions ? option : t(`rsvp.meal_options.${option}`));
+
+    // Same for allergens
+    const customAllergens = formHead?.allergens?.length ? formHead.allergens : null;
+    const allergenOptions = customAllergens || DEFAULT_ALLERGENS;
+    const allergenLabel = (option) => (customAllergens ? option : t(`rsvp.allergen_options.${option}`));
 
     const [currentStep, setCurrentStep] = useState(STEPS.CODE_ENTRY);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +47,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         attendance: null,
         guests: [{ name: '', ageCategory: 'adult' }],
         mealPreferences: [],
+        allergens: [],
         dietaryRestrictions: '',
         songRequest: '',
     });
@@ -100,6 +112,16 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         } else {
             submitRSVP(data, STEPS.DECLINED);
         }
+    };
+
+    // Select / unselect an option of a multi-choice field (mealPreferences, allergens)
+    const toggleChoice = (field, option) => {
+        setFormData(prev => ({
+        ...prev,
+        [field]: prev[field].includes(option)
+            ? prev[field].filter(p => p !== option)
+            : [...prev[field], option],
+        }));
     };
 
     // Add guest
@@ -303,43 +325,37 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div>
                 <h3 className="font-serif text-2xl text-burgundy mb-6 text-center">{t('rsvp.meal_preferences')}</h3>
 
+                {askMealChoice && (
                 <div className="mb-6">
                     <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.meal_preferences_label')}</label>
-                    <div className="grid grid-cols-2 gap-3">
-                    {mealOptions.map((option) => {
-                        const isSelected = formData.mealPreferences.includes(option);
-                        return (
-                        <button
-                            key={option}
-                            onClick={() => setFormData(prev => ({
-                            ...prev,
-                            mealPreferences: isSelected
-                                ? prev.mealPreferences.filter(p => p !== option)
-                                : [...prev.mealPreferences, option]
-                            }))}
-                            className={`py-3 border rounded-sm transition-all flex items-center justify-center gap-2 ${
-                            isSelected
-                                ? 'border-gold bg-gold/10 text-gold'
-                                : 'border-gray-300 text-gray-600 hover:border-gold'
-                            }`}
-                        >
-                            {isSelected && <span>✓</span>}
-                            {mealLabel(option)}
-                        </button>
-                        );
-                    })}
-                    </div>
+                    <ToggleGroup
+                    options={mealOptions}
+                    selected={formData.mealPreferences}
+                    onToggle={(option) => toggleChoice('mealPreferences', option)}
+                    getLabel={mealLabel}
+                    />
+                </div>
+                )}
+
+                <div className="mb-6">
+                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.allergens_label')}</label>
+                    <ToggleGroup
+                    options={allergenOptions}
+                    selected={formData.allergens}
+                    onToggle={(option) => toggleChoice('allergens', option)}
+                    getLabel={allergenLabel}
+                    />
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.dietary_notes')}</label>
-                    <textarea
+                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.dietary_other')}</label>
+                    <input
+                    type="text"
                     value={formData.dietaryRestrictions}
                     onChange={(e) => setFormData(prev => ({ ...prev, dietaryRestrictions: e.target.value }))}
                     placeholder={t('rsvp.dietary_placeholder')}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold resize-none"
-                    ></textarea>
+                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
+                    />
                 </div>
 
                 <div className="mb-8">
@@ -380,12 +396,20 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     <span className="text-gray-500">{t('rsvp.guests')}</span>
                     <span className="text-burgundy font-medium">{formData.guests.map(g => g.name).join(', ')}</span>
                     </div>
+                    {askMealChoice && (
                     <div className="flex justify-between py-3 border-b border-gray-200">
                     <span className="text-gray-500">{t('rsvp.meal_preferences')}</span>
                     <span className="text-burgundy font-medium">{formData.mealPreferences.length > 0
                         ? formData.mealPreferences.map(mealLabel).join(', ')
                         : t('common.none')}</span>
                     </div>
+                    )}
+                    {formData.allergens.length > 0 && (
+                    <div className="flex justify-between py-3 border-b border-gray-200">
+                        <span className="text-gray-500">{t('rsvp.allergens')}</span>
+                        <span className="text-burgundy font-medium">{formData.allergens.map(allergenLabel).join(', ')}</span>
+                    </div>
+                    )}
                     {formData.dietaryRestrictions && (
                     <div className="flex justify-between py-3 border-b border-gray-200">
                         <span className="text-gray-500">{t('rsvp.dietary_notes')}</span>

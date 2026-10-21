@@ -187,9 +187,16 @@ Manage in WordPress Admin → Wedding Settings:
 
 ## Meal Options
 
-Manage in WordPress Admin → Wedding Settings → RSVP → **Meal Options**: one option per line, shown to guests exactly as written (use your site's language). Leave it empty to use the built-in translated list (Meat, Fish, Gluten Free, Vegetarian, Vegan). The guest's choices are saved with the RSVP and included in the notification email.
+Manage in WordPress Admin → Wedding Settings → RSVP → **Meal Options**:
 
-The list is returned by `GET /wp-json/wedding/v1/settings` as `form.mealOptions`.
+- **Ask for a meal choice** (checkbox, on by default): untick it when the menu is already decided. Guests are then only asked for allergies / dietary notes and a song request, and no meal row appears in the review or the email. Tick it again if you want guests to choose.
+- **Options**: one option per line, shown to guests exactly as written (use your site's language). Leave it empty to use the built-in translated list (Meat, Fish, Gluten Free, Vegetarian, Vegan). With a fixed menu you can keep only the special diets, e.g. `Vegetarian` and `Vegan`.
+
+The guest's choices are saved with the RSVP and included in the notification email. The API exposes both settings in `GET /wp-json/wedding/v1/settings` as `form.askMealChoice` and `form.mealOptions`.
+
+### Allergens
+
+Same page, **Allergens** box: one allergen per line, shown to guests as tick buttons (same look as the meal options). Leave it empty to use the built-in translated list (Gluten, Milk, Eggs, Peanuts, Tree nuts, Fish, Shellfish, Soy, Sesame). Below the buttons, guests also get a short free-text field ("Not in the list? Tell us more") for anything else. Both are saved with the RSVP, shown in an **Allergens** column of the RSVP list and included in the email. Exposed as `form.allergens`.
 
 ---
 

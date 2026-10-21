@@ -109,7 +109,11 @@ function wedding_register_settings() {
     register_setting('wedding_settings', 'wedding_form_subtitle');
 
     register_setting('wedding_settings', 'wedding_access_codes');
+    register_setting('wedding_settings', 'wedding_ask_meal_choice');
     register_setting('wedding_settings', 'wedding_meal_options', [
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ]);
+    register_setting('wedding_settings', 'wedding_allergens', [
         'sanitize_callback' => 'sanitize_textarea_field',
     ]);
 }

@@ -36,6 +36,7 @@ add_filter('manage_wedding_rsvp_posts_columns', function($columns) {
             $new_columns['attendance'] = 'Status';
             $new_columns['guest_count'] = 'Guests';
             $new_columns['meal'] = 'Meal';
+            $new_columns['allergens'] = 'Allergens';
         } else if ($key !== 'date') {
             $new_columns[$key] = $value;
         }
@@ -57,6 +58,11 @@ add_action('manage_wedding_rsvp_posts_custom_column', function($column, $post_id
             break;
         case 'meal':
             echo get_post_meta($post_id, 'meal_preference', true) ?: '-';
+            break;
+        case 'allergens':
+            $allergens = get_post_meta($post_id, 'allergens', true);
+            $notes = get_post_meta($post_id, 'dietary_restrictions', true);
+            echo esc_html(trim($allergens . ($notes ? ' + ' . $notes : ''))) ?: '-';
             break;
     }
 }, 10, 2);
