@@ -116,6 +116,63 @@ function wedding_register_settings() {
     register_setting('wedding_settings', 'wedding_allergens', [
         'sanitize_callback' => 'sanitize_textarea_field',
     ]);
+    register_setting('wedding_settings', 'wedding_digest_recipients', [
+        'sanitize_callback' => 'wedding_sanitize_email_lines',
+    ]);
+}
+
+/**
+ * Keep only valid email addresses, one per line (commas accepted too), warn about the others
+ */
+function wedding_sanitize_email_lines($value) {
+    $valid = [];
+    $invalid = [];
+    foreach (preg_split('/[\s,;]+/', (string) $value, -1, PREG_SPLIT_NO_EMPTY) as $item) {
+        $email = sanitize_email($item);
+        if (is_email($email)) {
+            $valid[] = $email;
+        } else {
+            $invalid[] = $item;
+        }
+    }
+    if ($invalid) {
+        add_settings_error(
+            'wedding_digest_recipients',
+            'invalid_email',
+            'Ignored invalid email address(es): ' . esc_html(implode(', ', $invalid))
+        );
+    }
+    return implode("\n", array_unique($valid));
+}
+
+/**
+ * "Send email now" button (Wedding → Emails): emails the pending RSVPs right away
+ */
+add_action('admin_post_wedding_send_digest', 'wedding_handle_send_digest');
+function wedding_handle_send_digest() {
+    if (!current_user_can('manage_options')) {
+        wp_die('You are not allowed to do this.', '', ['response' => 403]);
+    }
+    check_admin_referer('wedding_send_digest');
+
+    $result = wedding_send_rsvp_digest();
+    if ($result === null) {
+        $status = 'busy';
+    } elseif ($result === false) {
+        $status = 'failed';
+    } else {
+        $status = $result === 0 ? 'empty' : 'sent';
+    }
+
+    // Passed through a short transient, not the URL, so the notice shows only once
+    // (a URL parameter would come back after the next "Save Settings")
+    set_transient(
+        'wedding_email_notice_' . get_current_user_id(),
+        ['status' => $status, 'count' => (int) $result],
+        MINUTE_IN_SECONDS
+    );
+    wp_safe_redirect(admin_url('admin.php?page=wedding-settings') . '#tab-emails');
+    exit;
 }
 
 /**

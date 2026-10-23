@@ -49,6 +49,15 @@ services:
       # Optional features
       WORDPRESS_ENABLE_GRAPHQL: ${WORDPRESS_ENABLE_GRAPHQL:-false}
       WORDPRESS_CORS_ORIGINS: ${WORDPRESS_CORS_ORIGINS:-http://localhost:5173}
+      # Nightly RSVP digest email to the hosts: hour (0-23, site timezone)
+      WEDDING_DIGEST_HOUR: ${WEDDING_DIGEST_HOUR:-2}
+      # SMTP for the digest emails (the image has no sendmail)
+      WEDDING_SMTP_HOST: ${WEDDING_SMTP_HOST:-}
+      WEDDING_SMTP_PORT: ${WEDDING_SMTP_PORT:-587}
+      WEDDING_SMTP_SECURE: ${WEDDING_SMTP_SECURE:-tls}
+      WEDDING_SMTP_USER: ${WEDDING_SMTP_USER:-}
+      WEDDING_SMTP_PASS: ${WEDDING_SMTP_PASS:-}
+      WEDDING_SMTP_FROM: ${WEDDING_SMTP_FROM:-}
     volumes:
       - wordpress_data:/var/www/html
       - ./wordpress-setup.sh:/usr/local/bin/wordpress-setup.sh:ro

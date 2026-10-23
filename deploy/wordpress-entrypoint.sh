@@ -34,6 +34,10 @@ if [ -f /usr/local/bin/wordpress-setup.sh ]; then
     bash /usr/local/bin/wordpress-setup.sh
 fi
 
+# Trigger WP-Cron every 5 minutes (it otherwise only runs on site visits),
+# so the nightly RSVP digest goes out on time
+( while sleep 300; do curl -fsS -o /dev/null http://localhost/wp-cron.php || true; done ) &
+
 # Keep Apache running
 echo "WordPress is ready!"
 wait $WP_PID

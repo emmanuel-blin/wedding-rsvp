@@ -45,7 +45,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const [formData, setFormData] = useState({
         accessCode: initialCode || '',
         attendance: null,
-        guests: [{ name: '', ageCategory: 'adult' }],
+        guests: [{ firstName: '', lastName: '', ageCategory: 'adult' }],
         mealPreferences: [],
         allergens: [],
         dietaryRestrictions: '',
@@ -124,11 +124,11 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         }));
     };
 
-    // Add guest
+    // Add guest (last name prefilled from the first guest: families usually share it)
     const addGuest = () => {
         setFormData(prev => ({
         ...prev,
-        guests: [...prev.guests, { name: '', ageCategory: 'adult' }],
+        guests: [...prev.guests, { firstName: '', lastName: prev.guests[0].lastName, ageCategory: 'adult' }],
         }));
     };
 
@@ -178,6 +178,23 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         }
     };
 
+    // First + last name for every guest (avoids confusion between guests with the same first name)
+    const guestFullName = (guest) => `${guest.firstName} ${guest.lastName}`.trim();
+    const allGuestsNamed = formData.guests.every(g => g.firstName.trim() && g.lastName.trim());
+
+    // Continue stays clickable: a blocked attempt highlights the missing names and says why
+    const [showNameErrors, setShowNameErrors] = useState(false);
+    const isNameMissing = (value) => showNameErrors && !value.trim();
+    const nameInputClass = (value) =>
+        `w-full px-4 py-3 border ${isNameMissing(value) ? 'border-red-400' : 'border-gray-300'} rounded-sm focus:outline-none focus:border-gold`;
+    const continueToAttendance = () => {
+        if (!allGuestsNamed) {
+            setShowNameErrors(true);
+            return;
+        }
+        setCurrentStep(STEPS.ATTENDANCE);
+    };
+
     // Progress indicator
     const totalSteps = 4;
     const currentProgress = Math.min(currentStep, 4);
@@ -199,7 +216,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
             {/* Error Message */}
             {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-sm">
+            <div role="alert" className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-sm">
                 {error}
             </div>
             )}
@@ -270,18 +287,32 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="space-y-4 mb-6">
                     {formData.guests.map((guest, index) => (
                     <div key={index} className="flex gap-3 items-start">
-                        <div className="flex-1">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input
                             type="text"
-                            value={guest.name}
-                            onChange={(e) => updateGuest(index, 'name', e.target.value)}
-                            placeholder={index === 0 ? t('rsvp.full_name') : t('rsvp.guest_name')}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
+                            value={guest.firstName}
+                            onChange={(e) => updateGuest(index, 'firstName', e.target.value)}
+                            placeholder={t('rsvp.first_name')}
+                            aria-label={t('rsvp.first_name')}
+                            aria-invalid={isNameMissing(guest.firstName)}
+                            autoComplete={index === 0 ? 'given-name' : 'off'}
+                            className={nameInputClass(guest.firstName)}
+                        />
+                        <input
+                            type="text"
+                            value={guest.lastName}
+                            onChange={(e) => updateGuest(index, 'lastName', e.target.value)}
+                            placeholder={t('rsvp.last_name')}
+                            aria-label={t('rsvp.last_name')}
+                            aria-invalid={isNameMissing(guest.lastName)}
+                            autoComplete={index === 0 ? 'family-name' : 'off'}
+                            className={nameInputClass(guest.lastName)}
                         />
                         </div>
                         <select
                         value={guest.ageCategory}
                         onChange={(e) => updateGuest(index, 'ageCategory', e.target.value)}
+                        aria-label={t('rsvp.age_category')}
                         className="px-3 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
                         >
                         <option value="adult">{t('rsvp.adult')}</option>
@@ -292,9 +323,10 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                         {index > 0 && (
                         <button
                             onClick={() => removeGuest(index)}
+                            aria-label={t('rsvp.remove_guest')}
                             className="p-3 text-red-400 hover:text-red-600"
                         >
-                            ✕
+                            <span aria-hidden="true">✕</span>
                         </button>
                         )}
                     </div>
@@ -308,11 +340,14 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     {t('rsvp.add_guest')}
                 </button>
 
+                {showNameErrors && !allGuestsNamed && (
+                <p role="alert" className="mb-4 text-sm text-red-700 text-right">{t('rsvp.error_names')}</p>
+                )}
+
                 <div className="flex justify-end">
                     <button
-                    onClick={() => setCurrentStep(STEPS.ATTENDANCE)}
-                    disabled={!formData.guests[0].name}
-                    className="px-8 py-3 bg-burgundy text-white uppercase tracking-wider hover:bg-burgundy/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+                    onClick={continueToAttendance}
+                    className="px-8 py-3 bg-burgundy text-white uppercase tracking-wider hover:bg-burgundy/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
                     </button>
@@ -394,7 +429,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="space-y-4 mb-8">
                     <div className="flex justify-between py-3 border-b border-gray-200">
                     <span className="text-gray-500">{t('rsvp.guests')}</span>
-                    <span className="text-burgundy font-medium">{formData.guests.map(g => g.name).join(', ')}</span>
+                    <span className="text-burgundy font-medium">{formData.guests.map(guestFullName).join(', ')}</span>
                     </div>
                     {askMealChoice && (
                     <div className="flex justify-between py-3 border-b border-gray-200">

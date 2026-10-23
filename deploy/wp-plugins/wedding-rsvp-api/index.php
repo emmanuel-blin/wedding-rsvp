@@ -6,7 +6,7 @@
  * Description: Add RSVP functionality to wordpress REST API
  * Requires at least: 5.0
  * Requires PHP: 5.6
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: E.Blin
  * Author URI: https://b-link.xyz
  * Text Domain: Wedding RSVP
@@ -29,4 +29,9 @@ include plugin_dir_path(__FILE__) . 'includes/cors.php';
 
 // Admin setup
 include plugin_dir_path(__FILE__) . 'admin-setup.php';
+
+// Stop the nightly RSVP digest when the plugin is turned off (rescheduled on the next load)
+register_deactivation_hook(__FILE__, function () {
+    wp_clear_scheduled_hook('wedding_rsvp_digest');
+});
 

@@ -51,12 +51,31 @@
 <div class="wrap wedding-settings-wrap">
     <h1>💒 Wedding Settings</h1>
 
+    <?php settings_errors(); ?>
+    <?php
+    // Result of the "Send email now" button, shown once (see wedding_handle_send_digest)
+    $notice_key = 'wedding_email_notice_' . get_current_user_id();
+    $digest_result = get_transient($notice_key);
+    delete_transient($notice_key);
+    $digest_status = is_array($digest_result) ? $digest_result['status'] : '';
+    $digest_notices = [
+        'sent' => ['success', sprintf('Email sent with %d new RSVP(s).', is_array($digest_result) ? $digest_result['count'] : 0)],
+        'empty' => ['info', 'No new RSVP since the last email: nothing to send.'],
+        'busy' => ['warning', 'An email is already being sent. Try again in a minute.'],
+        'failed' => ['error', 'The email could not be sent. Check the SMTP settings (WEDDING_SMTP_* in .env) and the logs: docker logs wordpress_backend.'],
+    ];
+    if (isset($digest_notices[$digest_status])):
+        list($notice_type, $notice_text) = $digest_notices[$digest_status]; ?>
+        <div class="notice notice-<?= $notice_type; ?> is-dismissible"><p><?= esc_html($notice_text); ?></p></div>
+    <?php endif; ?>
+
     <h2 class="nav-tab-wrapper">
         <a class="nav-tab active" data-tab="general">General</a>
         <a class="nav-tab" data-tab="venues">Venues</a>
         <a class="nav-tab" data-tab="timeline">Timeline</a>
         <a class="nav-tab" data-tab="content">Content</a>
         <a class="nav-tab" data-tab="rsvp">RSVP</a>
+        <a class="nav-tab" data-tab="emails">Emails</a>
     </h2>
 
     <form method="post" action="options.php">
@@ -380,6 +399,46 @@
                     <td>
                         <textarea id="wedding_access_codes" name="wedding_access_codes" rows="6" class="large-text" placeholder="LOVE2025&#10;WEDDING&#10;TEST123"><?= esc_textarea(get_option('wedding_access_codes', "LOVE2025\nWEDDING\nTEST123\nEMMA2025\nJohn2025")); ?></textarea>
                         <p class="description">One code per line. Codes are case-insensitive.</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="tab-emails" class="tab-panel">
+            <div class="section-header">
+                <span class="section-icon">📬</span>
+                <h3>RSVP Emails</h3>
+            </div>
+            <p>Every night, one email lists the RSVPs received during the day (no email if there is none). Every RSVP is also listed in the RSVPs menu.</p>
+            <?php
+            $pending_rsvps = get_posts([
+                'post_type' => 'wedding_rsvp',
+                'posts_per_page' => -1,
+                'fields' => 'ids',
+                'meta_key' => 'notified',
+                'meta_value' => '0',
+            ]);
+            $next_digest = wp_next_scheduled('wedding_rsvp_digest');
+            ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="wedding_digest_recipients">Recipients</label></th>
+                    <td>
+                        <textarea id="wedding_digest_recipients" name="wedding_digest_recipients" rows="3" class="large-text" placeholder="<?= esc_attr(get_option('admin_email')); ?>"><?= esc_textarea(get_option('wedding_digest_recipients', '')); ?></textarea>
+                        <p class="description">Who receives the RSVP emails, one address per line (e.g. both of you). Leave empty to use the WordPress admin email (<?= esc_html(get_option('admin_email')); ?>).</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Send now</th>
+                    <td>
+                        <a href="<?= esc_url(wp_nonce_url(admin_url('admin-post.php?action=wedding_send_digest'), 'wedding_send_digest')); ?>" class="button">Send email now</a>
+                        <p class="description">
+                            <?= count($pending_rsvps); ?> new RSVP(s) not emailed yet.
+                            <?php if ($next_digest): ?>
+                                Next automatic email: <?= esc_html(wp_date('F j, Y H:i', $next_digest)); ?> (<?= esc_html(wp_timezone_string()); ?>).
+                            <?php endif; ?>
+                            Save your changes first: this button does not save the settings.
+                        </p>
                     </td>
                 </tr>
             </table>

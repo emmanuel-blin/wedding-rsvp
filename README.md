@@ -76,7 +76,6 @@ The script will:
 | **WordPress GraphQL** | http://localhost:8080/graphql | - | Optional* |
 | **Wedding API** | http://localhost:8080/wp-json/wedding/v1/ | - |
 | **phpMyAdmin** | http://localhost:8081 (host machine only**) | root / `MYSQL_ROOT_PASSWORD` from `.env` |
-
 #### **\* GraphQL requires setting `WORDPRESS_ENABLE_GRAPHQL=true` in `.env`**
 #### **\*\* phpMyAdmin is bound to `127.0.0.1`, see [phpMyAdmin access](#phpmyadmin-access)**
 ---
@@ -118,6 +117,14 @@ wedding-rsvp/
 │   │   └── package.json
 │   ├── wp-plugins/
 │   │   └── wedding-rsvp-api/        # Custom WP plugin
+│   │       ├── index.php            # Plugin entry (version, includes)
+│   │       ├── admin-setup.php      # Registered settings
+│   │       ├── admin-settings.php   # wp-admin "Wedding" settings tabs
+│   │       └── includes/
+│   │           ├── api-read.php     # GET /settings, /stories
+│   │           ├── api-rsvp.php     # POST /rsvp, /validate-code, nightly digest email, SMTP
+│   │           ├── rsvp-type.php    # RSVP post type + admin columns
+│   │           └── cors.php         # CORS headers (WORDPRESS_CORS_ORIGINS)
 │   └── wp-themes/
 │       └── weddingrsvpblank/        # Blank WP theme
 └── README.md
@@ -155,6 +162,13 @@ Edit `deploy/.env` to customize:
 | `VITE_API_BASE` | http://localhost:8080/wp-json/wedding/v1 | Wedding API URL, as seen from the **browser** |
 | `WORDPRESS_CORS_ORIGINS` | http://localhost:5173 | Allowed CORS origins (the frontend's public origin, no port/path unless needed) |
 | `WORDPRESS_ENABLE_GRAPHQL` | false | Enable WPGraphQL plugin |
+| `WORDPRESS_ADMIN_EMAIL` | admin@example.com | WP admin email, **only used at the first install** (later: WP Admin → Settings → General). Receives the RSVP digest when no recipient is set in Wedding → Emails |
+| `WEDDING_DIGEST_HOUR` | 2 | Hour (0-23) of the nightly RSVP digest, in the WordPress timezone (Settings → General, UTC by default) |
+| `WEDDING_SMTP_HOST` | *(empty)* | SMTP server. **Required to send any email**: the WordPress image has no sendmail |
+| `WEDDING_SMTP_PORT` | 587 | SMTP port |
+| `WEDDING_SMTP_SECURE` | tls | `tls` (587), `ssl` (465) or `none` |
+| `WEDDING_SMTP_USER` / `WEDDING_SMTP_PASS` | *(empty)* | SMTP login (e.g. a Gmail address + an app password) |
+| `WEDDING_SMTP_FROM` | `WEDDING_SMTP_USER` | Sender address (most providers only accept a verified one) |
 
 > `VITE_API_BASE` is read when the frontend container starts. After changing it (or any `.env` value), recreate the container: `docker compose up -d --force-recreate frontend`. A plain restart does not pick up new env vars.
 
@@ -169,7 +183,7 @@ All endpoints under `/wp-json/wedding/v1/`:
 | `/settings` | GET | Wedding settings (dates, venue, etc.) |
 | `/stories` | GET | Our Story posts |
 | `/validate-code` | POST | Validate access code |
-| `/rsvp` | POST | Submit RSVP |
+| `/rsvp` | POST | Submit RSVP (saved as an RSVP post, included in the next [nightly digest](#rsvp-digest-email)) |
 
 ---
 
@@ -197,6 +211,20 @@ The guest's choices are saved with the RSVP and included in the notification ema
 ### Allergens
 
 Same page, **Allergens** box: one allergen per line, shown to guests as tick buttons (same look as the meal options). Leave it empty to use the built-in translated list (Gluten, Milk, Eggs, Peanuts, Tree nuts, Fish, Shellfish, Soy, Sesame). Below the buttons, guests also get a short free-text field ("Not in the list? Tell us more") for anything else. Both are saved with the RSVP, shown in an **Allergens** column of the RSVP list and included in the email. Exposed as `form.allergens`.
+
+---
+
+## RSVP Digest Email
+
+The hosts get **one email per night** listing the RSVPs received since the previous one (guests, attendance, meal, allergens, notes, song), plus running totals. No new RSVP = no email. Guests never receive an email; every RSVP is also visible in WP Admin → RSVPs.
+
+- **Recipients**: WP Admin → Wedding → Settings → **Emails** tab, one address per line (e.g. both hosts). Leave empty to use the WordPress admin email. Handy when you host the site for a couple: you stay the WordPress admin, they get the digest. Invalid addresses are dropped with a warning when saving.
+- Sent at `WEDDING_DIGEST_HOUR` (default 2 am, WordPress timezone: set it in Settings → General, it is UTC by default). The Emails tab shows how many RSVPs are waiting and when the next digest is due.
+- **Send email now** (same tab): sends the waiting RSVPs right away and shows the result once (sent / nothing new / already sending / failed). It does not save the settings: save first if you changed the recipients. A lock prevents the button and the nightly run from emailing the same RSVPs twice.
+- Needs SMTP (`WEDDING_SMTP_*` in `.env`), then `docker compose up -d wordpress` to apply.
+- If sending fails, the RSVPs stay pending and are retried the next night. Errors are logged: `docker logs wordpress_backend 2>&1 | grep "Wedding RSVP"`.
+- WP-Cron only runs when someone visits the site, so `wordpress-entrypoint.sh` runs a small background loop inside the WordPress container that calls `http://localhost/wp-cron.php` every 5 minutes. The digest therefore leaves within 5 minutes of the set hour, with no extra container and nothing to install on the host. Check the next run: `docker exec wordpress_backend wp cron event list --allow-root` (`wedding_rsvp_digest`).
+- From the command line: `docker exec wordpress_backend wp cron event run wedding_rsvp_digest --allow-root` (a mail error is then printed in your terminal, not in `docker logs`). To resend RSVPs already emailed: `wp post meta update <id> notified 0 --allow-root`, then send again.
 
 ---
 
@@ -412,6 +440,20 @@ docker compose up -d --force-recreate frontend wordpress
 6. **Resource limits** - Memory is capped per container in `docker-compose.yml` (db 512M, wordpress 512M, frontend 512M, phpmyadmin 128M) so one runaway container cannot freeze the host. Raise them if a container gets OOM-killed (`docker inspect <name> --format '{{.State.OOMKilled}}'`)
 7. **GraphQL** - Only enable if you need it
 8. **Frontend** - The stack runs the Vite dev server (with polling for the bind mount). That is fine for a short-lived, invite-only site; serve a static build instead if it becomes long-lived
+9. **Email** - Set `WEDDING_SMTP_*` and the digest recipients (Wedding → Emails), otherwise the hosts get no RSVP email at all. Send a test digest before the invitations go out (see [RSVP Digest Email](#rsvp-digest-email))
+
+## Plugin Changelog
+
+### 1.2.1
+- **Nightly digest email** for the hosts replaces the email sent on each RSVP (none was actually sent before: the WordPress image has no sendmail). New RSVPs are saved with `notified=0`, the WP-Cron event `wedding_rsvp_digest` emails them once a night at `WEDDING_DIGEST_HOUR` and flips them to `1` only if sending worked. The event is rescheduled by itself when the hour, the timezone or DST changes, and cleared when the plugin is deactivated. `wordpress-entrypoint.sh` now triggers WP-Cron every 5 minutes from inside the WordPress container, so it doesn't depend on site visits (no extra service). A lock (`wedding_digest_lock` option, taken over after 10 minutes) prevents the nightly run and the button from sending the same RSVPs twice.
+- **Guest first and last names**: the RSVP form asks for a first name and a last name for every guest (both required, to tell apart guests with the same first name); added guests get the first guest's last name prefilled. Continue explains which names are missing, the age select and the remove-guest button have accessible labels, and errors are announced (`role="alert"`). The API takes `guests[].firstName` / `lastName` and stores `firstName`, `lastName`, `name` (full) and `ageCategory`; the RSVP title and the digest show full names. Translation keys `rsvp.first_name` / `rsvp.last_name` replace `rsvp.full_name` / `rsvp.guest_name`.
+- **SMTP** through `phpmailer_init`, configured with the `WEDDING_SMTP_*` env variables; mail errors are logged (`docker logs wordpress_backend`).
+- **Digest recipients + "Send email now"** in Wedding → Emails: option `wedding_digest_recipients` (one email per line, validated on save, empty = WordPress admin email), a button that sends the pending RSVPs at once (`admin-post.php?action=wedding_send_digest`, nonce + `manage_options`), plus the pending count and next run; its result is shown once (passed through a transient). The settings page now shows WordPress notices ("Settings saved", invalid addresses). `wedding_send_rsvp_digest()` returns the number of RSVPs sent, `0`, `false` (failed) or `null` (already sending).
+- **Guests payload hardened**: each guest's `name` and `ageCategory` are sanitised (unknown age → `adult`, rows without a name dropped) before being stored; the `guests` JSON meta keeps quotes and accents (it was corrupted on save); no PHP warning when `guests` is missing. `POST /rsvp` returns 400 when no guest has a name; the old `{name}` guest shape is still accepted for forms loaded before the update. Names are decoded in the plain-text email (no more `&amp;`).
+- RSVPs saved before 1.2.1 have no `notified` flag and are not included in any digest (they are still in WP Admin → RSVPs).
+
+### 1.2.0
+- Meal choice fixed (it was never saved), meal options and allergens configurable in wp-admin, "Ask for a meal choice" checkbox.
 
 ## License
 
