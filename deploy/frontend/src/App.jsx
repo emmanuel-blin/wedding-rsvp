@@ -27,7 +27,7 @@ function App() {
     if (loading) {
         return (
         <div className="min-h-screen bg-cream flex items-center justify-center">
-            <div className="text-burgundy text-xl">{t('common.loading')}</div>
+            <div role="status" className="text-burgundy text-xl">{t('common.loading')}</div>
         </div>
         );
     }
@@ -52,6 +52,7 @@ function App() {
 
     return (
         <div className="min-h-screen bg-cream">
+        <main>
         <Hero
             onRSVPClick={scrollToRSVP}
             weddingDate={weddingDate}
@@ -78,6 +79,7 @@ function App() {
         <div ref={rsvpRef}>
             <RSVPForm accessCode={accessCode} formHead={settings?.form} />
         </div>
+        </main>
 
         {/* Footer */}
         <footer className="py-8 bg-burgundy text-center">
@@ -89,7 +91,7 @@ function App() {
                 Version {packageJson.version}
             </p>
             <p className="text-champagne/60 text-xs mt-2">
-                Made with love
+                {t('common.made_with_love')}
             </p>
             </div>
         </footer>

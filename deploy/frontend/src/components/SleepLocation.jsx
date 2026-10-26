@@ -37,7 +37,7 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center mb-12">
-            <p className="text-rose-gold tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</p>
+            <h3 className="font-sans text-rose-gold tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</h3>
             <div className="mt-4 w-24 h-[1px] bg-gold mx-auto"></div>
             </div>
 
@@ -57,15 +57,16 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
                 rel="noopener noreferrer"
                 className="group flex items-center gap-4 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gold bg-cream hover:bg-white active:bg-white"
                 >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-colors duration-300">
+                <div aria-hidden="true" className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-colors duration-300">
                     {service.icon}
                 </div>
                 <div className="flex-1">
-                    <h3 className="font-serif text-xl text-burgundy group-hover:text-gold transition-colors duration-300">{service.name}</h3>
+                    <h4 className="font-serif text-xl text-burgundy group-hover:text-gold transition-colors duration-300">{service.name}</h4>
                     <p className="text-sm text-gray-500">{t('defaults.sleep_search_near', { venueName })}</p>
                 </div>
                 <svg
-                    className="w-5 h-5 text-gray-400 group-hover:text-gold transition-all duration-300 transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                    className="w-5 h-5 text-gray-400 group-hover:text-gold transition-all duration-300 transform motion-safe:group-hover:translate-x-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

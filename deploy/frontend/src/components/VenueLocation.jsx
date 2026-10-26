@@ -52,7 +52,7 @@ export default function VenueLocation({
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title={`${title} Location`}
+                title={t('location.map_of', { place: title })}
             ></iframe>
             </div>
         </div>
@@ -79,7 +79,7 @@ export default function VenueLocation({
                 <ul className="text-gray-600 space-y-2">
                 {gettingThere.filter(item => item && item.trim() !== "").map((item, index) => (
                     <li key={index} className="flex gap-2">
-                    <span>•</span>
+                    <span aria-hidden="true">•</span>
                     <span>{item}</span>
                     </li>
                 ))}
@@ -97,7 +97,7 @@ export default function VenueLocation({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-4 py-3 shadow-md hover:shadow-xl border-2 border-transparent hover:border-gold text-burgundy hover:text-gold rounded-sm transition-all duration-300 text-sm uppercase tracking-wider bg-cream active:bg-white hover:bg-white "
                 >
-                {link.icon}
+                <span aria-hidden="true">{link.icon}</span>
                 {link.name}
                 </a>
             ))}

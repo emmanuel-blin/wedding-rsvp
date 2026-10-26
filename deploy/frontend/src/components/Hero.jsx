@@ -56,7 +56,7 @@ function calculateTimeLeft(weddingDate) {
         {/* Content */}
         <div className="relative text-center text-white px-4">
             {/* Names */}
-            <p className="text-champagne tracking-[0.3em] uppercase text-sm md:text-base mb-4 animate-fade-in">
+            <p className="text-champagne tracking-[0.3em] uppercase text-sm md:text-base mb-4">
             {displayHeroSubtitle}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-2 tracking-wide">
@@ -97,15 +97,15 @@ function calculateTimeLeft(weddingDate) {
             onClick={onRSVPClick}
             className="group relative inline-flex items-center justify-center px-10 py-4 text-sm
                         md:text-base font-medium tracking-[0.2em] uppercase text-white border-2 border-gold rounded-lg bg-transparent overflow-hidden transition-all duration-500
-                        hover:text-burgundy hover:border-gold hover:bg-gold hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                        hover:text-burgundy hover:border-gold hover:bg-gold motion-safe:hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
             >
             <span className="relative z-10">{t('hero.rsvp_now')}</span>
             </button>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-            <svg className="w-6 h-6 text-champagne/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 motion-safe:animate-bounce">
+            <svg className="w-6 h-6 text-champagne/60" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
         </div>

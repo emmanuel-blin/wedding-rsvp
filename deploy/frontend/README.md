@@ -91,6 +91,7 @@ Edit `src/index.css`:
   --color-cream: #fdfaf5;
 }
 ```
+Keep text readable when changing colors (WCAG AA: 4.5:1 for normal text, 3:1 for large text and field borders). The current `gold` is only 2.1:1 against white, so it should not carry white or small text (buttons, selected options); this is planned with the v2 theme palettes.
 
 ---
 
@@ -150,6 +151,15 @@ Section, where the guests can easaly get to rent a place to stay after the event
 **Flow:** access code → guest names → attendance → meal preferences → review → success. Names are collected *before* asking about attendance, so clicking "Regretfully decline" submits the RSVP immediately (with the names) and shows the "we will miss you" screen. The meal section is configured in wp-admin → Wedding → RSVP → Meal Options: a checkbox turns the dish choice off (fixed menu: only allergies/notes are asked), and the options list (one per line) replaces the translated defaults when filled. Allergens work the same way (Allergens box) and are always asked, as tick buttons plus a free-text "Not in the list? Tell us more" field. If a submission fails, an error is shown and the guest can retry instead of seeing a fake success screen.
 
 The RSVP form, this will be the one that will let you know who is comming (/or is not comming (soon<sup>TM</sup>)), for now it is a fixed form, meaning it's content and steps is hard coded, but you get the first and last name of each guest if they come with a +1 or more, they can let you know if they have a specific regime or food alergies, what kind of music they want. I'm looking into make this form configurable in the wp-admin wedding plugin. This form needs a code that can be passed in the URL `/?code=TEST123` for exemple, this code can be set in wp-admin -> settings tab RSVP, this is to avoid litle smart a** to spam or worst your wordpress, every RSVP is saved in wp-admin (RSVPs) and the hosts get one email per night with the new ones (recipients set in wp-admin -> Wedding -> Emails, with a "Send email now" button; needs SMTP: see the main README, "RSVP Digest Email").
+
+## Accessibility
+Guests mostly answer on phones and some are older relatives, so the site follows WCAG 2.2 AA where the code allows it (audit with the `/a11y-check` skill):
+- **Form fields:** every field has a label (`aria-label` or `htmlFor`), required names use `aria-required`, the meal/allergen choices are `fieldset`/`legend` groups with `aria-pressed` buttons, each guest row is a group named "Invité N". Field borders (`gray-500`) and the focus ring (burgundy) are at least 3:1 on cream. The access code can be submitted with Enter.
+- **Step changes:** when the guest moves to another RSVP step, focus goes to that step's heading, so screen readers announce it (including the thank-you and declined screens). Not on page load, so a `?code=` link does not jump to the form.
+- **Phones:** in the guest step the age and remove controls sit under the names; the remove button is a 44px target.
+- **Motion:** zoom, bounce and slide effects only run when the device does not ask for reduced motion (`motion-safe:`).
+- **Page:** `<html lang="fr">` (to be updated at runtime with the v2 language toggle), one `<main>` landmark, decorative icons and emoji hidden from screen readers.
+- **Still to do (v2 theme palettes):** text contrast of `gold` (buttons, selected options, hover text), `gray-400` step text and `rose-gold` subtitles.
 
 ## Troubleshooting
 

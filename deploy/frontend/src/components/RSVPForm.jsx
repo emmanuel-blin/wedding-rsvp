@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../utils/translations';
 import ProgressBar from './ProgressBar';
@@ -22,6 +22,10 @@ const STEPS = {
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
+// Text fields: border at 3:1 on cream, clear focus ring (older guests on phones)
+const INPUT_BASE = 'px-4 py-3 border rounded-sm focus:outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy';
+const INPUT_CLASS = `w-full ${INPUT_BASE} border-gray-500`;
+
 export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const { t } = useTranslation();
 
@@ -41,6 +45,22 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const [currentStep, setCurrentStep] = useState(STEPS.CODE_ENTRY);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // After a step change made by the guest, focus the new step's heading so keyboard and
+    // screen-reader users are not sent back to the top of the page (skipped on page load)
+    const stepHeadingRef = useRef(null);
+    const focusNextStep = useRef(false);
+    const goToStep = (step) => {
+        focusNextStep.current = true;
+        setCurrentStep(step);
+    };
+    useEffect(() => {
+        if (focusNextStep.current) {
+            focusNextStep.current = false;
+            stepHeadingRef.current?.focus();
+        }
+    }, [currentStep]);
+    const stepHeadingProps = { ref: stepHeadingRef, tabIndex: -1 };
 
     const [formData, setFormData] = useState({
         accessCode: initialCode || '',
@@ -91,7 +111,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
         if (response.ok) {
             setFormData(prev => ({ ...prev, accessCode: prev.accessCode.toUpperCase() }));
-            setCurrentStep(STEPS.GUESTS);
+            goToStep(STEPS.GUESTS);
         } else {
             setError(t('rsvp.error_code'));
         }
@@ -108,7 +128,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         const data = { ...formData, attendance: attending };
         setFormData(data);
         if (attending) {
-            setCurrentStep(STEPS.PREFERENCES);
+            goToStep(STEPS.PREFERENCES);
         } else {
             submitRSVP(data, STEPS.DECLINED);
         }
@@ -167,7 +187,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
         });
 
         if (response.ok) {
-            setCurrentStep(nextStep);
+            goToStep(nextStep);
         } else {
             throw new Error('Submission failed');
         }
@@ -186,13 +206,13 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
     const [showNameErrors, setShowNameErrors] = useState(false);
     const isNameMissing = (value) => showNameErrors && !value.trim();
     const nameInputClass = (value) =>
-        `w-full px-4 py-3 border ${isNameMissing(value) ? 'border-red-400' : 'border-gray-300'} rounded-sm focus:outline-none focus:border-gold`;
+        `w-full ${INPUT_BASE} ${isNameMissing(value) ? 'border-red-600' : 'border-gray-500'}`;
     const continueToAttendance = () => {
         if (!allGuestsNamed) {
             setShowNameErrors(true);
             return;
         }
-        setCurrentStep(STEPS.ATTENDANCE);
+        goToStep(STEPS.ATTENDANCE);
     };
 
     // Progress indicator
@@ -226,36 +246,45 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
             {/* Step 0: Code Entry */}
             {currentStep === STEPS.CODE_ENTRY && (
-                <div className="text-center">
-                <h3 className="font-serif text-2xl text-burgundy mb-4">{t('rsvp.enter_your_code')}</h3>
+                <form
+                className="text-center"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    validateCode();
+                }}
+                >
+                <h3 {...stepHeadingProps} className="font-serif text-2xl text-burgundy mb-4 focus:outline-none">{t('rsvp.enter_your_code')}</h3>
                 <p className="text-gray-600 mb-6">{t('rsvp.please_enter_your_code')}</p>
                 <input
                     type="text"
                     value={formData.accessCode}
                     onChange={(e) => setFormData(prev => ({ ...prev, accessCode: e.target.value }))}
                     placeholder={t('rsvp.enter_code')}
-                    className="w-full max-w-xs mx-auto block px-4 py-3 border border-gray-300 rounded-sm text-center uppercase tracking-widest focus:outline-none focus:border-gold"
+                    aria-label={t('rsvp.access_code')}
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    className={`${INPUT_BASE} border-gray-500 w-full max-w-xs mx-auto block text-center uppercase tracking-widest`}
                 />
                 <button
-                    onClick={validateCode}
+                    type="submit"
                     disabled={isLoading || !formData.accessCode}
                     className="mt-6 px-8 py-3 bg-burgundy text-white uppercase tracking-wider hover:bg-burgundy/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isLoading ? t('rsvp.verification') : t('rsvp.continue')}
                 </button>
-                </div>
+                </form>
             )}
 
             {/* Step 2: Attendance (after guests, so a decline can be submitted with names) */}
             {currentStep === STEPS.ATTENDANCE && (
                 <div className="text-center">
-                <h3 className="font-serif text-2xl text-burgundy mb-4">{t('rsvp.will_you_join_us')}?</h3>
+                <h3 {...stepHeadingProps} className="font-serif text-2xl text-burgundy mb-4 focus:outline-none">{t('rsvp.will_you_join_us')}?</h3>
                 <p className="text-gray-600 mb-8">{t('rsvp.we_truly_hope_you_can_celebrate_this_special_day_with_us')}.</p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                     onClick={() => handleAttendance(true)}
                     disabled={isLoading}
-                    className="px-12 py-4 bg-gold text-white font-medium uppercase tracking-wider hover:bg-gold/90 transition-all hover:scale-105 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-12 py-4 bg-gold text-white font-medium uppercase tracking-wider hover:bg-gold/90 transition-all motion-safe:hover:scale-105 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                     {t('rsvp.joyfully_accept')}
                     </button>
@@ -269,7 +298,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 </div>
                 <div className="flex justify-start mt-8">
                     <button
-                    onClick={() => setCurrentStep(STEPS.GUESTS)}
+                    onClick={() => goToStep(STEPS.GUESTS)}
                     disabled={isLoading}
                     className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
                     >
@@ -282,18 +311,21 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             {/* Step 1: Guests */}
             {currentStep === STEPS.GUESTS && (
                 <div>
-                <h3 className="font-serif text-2xl text-burgundy mb-6 text-center">{t('rsvp.who_will_be_attending')}?</h3>
+                <h3 {...stepHeadingProps} className="font-serif text-2xl text-burgundy mb-6 text-center focus:outline-none">{t('rsvp.who_will_be_attending')}?</h3>
 
                 <div className="space-y-4 mb-6">
                     {formData.guests.map((guest, index) => (
-                    <div key={index} className="flex gap-3 items-start">
+                    // One group per guest, so screen readers say "Invité 2" before its fields.
+                    // On phones the age and remove controls go under the names to leave them room.
+                    <div key={index} role="group" aria-label={t('rsvp.guest_n', { n: index + 1 })} className="flex flex-col sm:flex-row gap-3 sm:items-start">
                         <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input
                             type="text"
                             value={guest.firstName}
                             onChange={(e) => updateGuest(index, 'firstName', e.target.value)}
-                            placeholder={t('rsvp.first_name')}
+                            placeholder={`${t('rsvp.first_name')} *`}
                             aria-label={t('rsvp.first_name')}
+                            aria-required="true"
                             aria-invalid={isNameMissing(guest.firstName)}
                             autoComplete={index === 0 ? 'given-name' : 'off'}
                             className={nameInputClass(guest.firstName)}
@@ -302,33 +334,36 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                             type="text"
                             value={guest.lastName}
                             onChange={(e) => updateGuest(index, 'lastName', e.target.value)}
-                            placeholder={t('rsvp.last_name')}
+                            placeholder={`${t('rsvp.last_name')} *`}
                             aria-label={t('rsvp.last_name')}
+                            aria-required="true"
                             aria-invalid={isNameMissing(guest.lastName)}
                             autoComplete={index === 0 ? 'family-name' : 'off'}
                             className={nameInputClass(guest.lastName)}
                         />
                         </div>
+                        <div className="flex gap-3">
                         <select
-                        value={guest.ageCategory}
-                        onChange={(e) => updateGuest(index, 'ageCategory', e.target.value)}
-                        aria-label={t('rsvp.age_category')}
-                        className="px-3 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
+                            value={guest.ageCategory}
+                            onChange={(e) => updateGuest(index, 'ageCategory', e.target.value)}
+                            aria-label={t('rsvp.age_category')}
+                            className={`${INPUT_BASE} border-gray-500 px-3 flex-1 sm:flex-none`}
                         >
-                        <option value="adult">{t('rsvp.adult')}</option>
-                        <option value="child">{t('rsvp.child')}</option>
-                        <option value="teen">{t('rsvp.teen')}</option>
-                        <option value="baby">{t('rsvp.baby')}</option>
+                            <option value="adult">{t('rsvp.adult')}</option>
+                            <option value="child">{t('rsvp.child')}</option>
+                            <option value="teen">{t('rsvp.teen')}</option>
+                            <option value="baby">{t('rsvp.baby')}</option>
                         </select>
                         {index > 0 && (
-                        <button
+                            <button
                             onClick={() => removeGuest(index)}
                             aria-label={t('rsvp.remove_guest')}
-                            className="p-3 text-red-400 hover:text-red-600"
-                        >
+                            className="min-w-11 min-h-11 flex items-center justify-center text-red-600 hover:text-red-800"
+                            >
                             <span aria-hidden="true">✕</span>
-                        </button>
+                            </button>
                         )}
+                        </div>
                     </div>
                     ))}
                 </div>
@@ -358,61 +393,63 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             {/* Step 3: Preferences */}
             {currentStep === STEPS.PREFERENCES && (
                 <div>
-                <h3 className="font-serif text-2xl text-burgundy mb-6 text-center">{t('rsvp.meal_preferences')}</h3>
+                <h3 {...stepHeadingProps} className="font-serif text-2xl text-burgundy mb-6 text-center focus:outline-none">{t('rsvp.meal_preferences')}</h3>
 
                 {askMealChoice && (
-                <div className="mb-6">
-                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.meal_preferences_label')}</label>
+                <fieldset className="mb-6">
+                    <legend className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.meal_preferences_label')}</legend>
                     <ToggleGroup
                     options={mealOptions}
                     selected={formData.mealPreferences}
                     onToggle={(option) => toggleChoice('mealPreferences', option)}
                     getLabel={mealLabel}
                     />
-                </div>
+                </fieldset>
                 )}
 
-                <div className="mb-6">
-                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.allergens_label')}</label>
+                <fieldset className="mb-6">
+                    <legend className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.allergens_label')}</legend>
                     <ToggleGroup
                     options={allergenOptions}
                     selected={formData.allergens}
                     onToggle={(option) => toggleChoice('allergens', option)}
                     getLabel={allergenLabel}
                     />
-                </div>
+                </fieldset>
 
                 <div className="mb-6">
-                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.dietary_other')}</label>
+                    <label htmlFor="rsvp-dietary" className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.dietary_other')}</label>
                     <input
+                    id="rsvp-dietary"
                     type="text"
                     value={formData.dietaryRestrictions}
                     onChange={(e) => setFormData(prev => ({ ...prev, dietaryRestrictions: e.target.value }))}
                     placeholder={t('rsvp.dietary_placeholder')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
+                    className={INPUT_CLASS}
                     />
                 </div>
 
                 <div className="mb-8">
-                    <label className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.song_request')}</label>
+                    <label htmlFor="rsvp-song" className="block text-sm text-gray-500 uppercase tracking-wider mb-3">{t('rsvp.song_request')}</label>
                     <input
+                    id="rsvp-song"
                     type="text"
                     value={formData.songRequest}
                     onChange={(e) => setFormData(prev => ({ ...prev, songRequest: e.target.value }))}
                     placeholder={t('rsvp.song_placeholder')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:outline-none focus:border-gold"
+                    className={INPUT_CLASS}
                     />
                 </div>
 
                 <div className="flex justify-between">
                     <button
-                    onClick={() => setCurrentStep(STEPS.ATTENDANCE)}
+                    onClick={() => goToStep(STEPS.ATTENDANCE)}
                     className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
                     >
                     ← {t('common.back')}
                     </button>
                     <button
-                    onClick={() => setCurrentStep(STEPS.REVIEW)}
+                    onClick={() => goToStep(STEPS.REVIEW)}
                     className="px-8 py-3 bg-burgundy text-white uppercase tracking-wider hover:bg-burgundy/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
@@ -424,7 +461,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             {/* Step 4: Review */}
             {currentStep === STEPS.REVIEW && (
                 <div>
-                <h3 className="font-serif text-2xl text-burgundy mb-6 text-center">{t('rsvp.review')}</h3>
+                <h3 {...stepHeadingProps} className="font-serif text-2xl text-burgundy mb-6 text-center focus:outline-none">{t('rsvp.review')}</h3>
 
                 <div className="space-y-4 mb-8">
                     <div className="flex justify-between py-3 border-b border-gray-200">
@@ -461,7 +498,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
 
                 <div className="flex justify-between">
                     <button
-                    onClick={() => setCurrentStep(STEPS.PREFERENCES)}
+                    onClick={() => goToStep(STEPS.PREFERENCES)}
                     className="px-6 py-3 text-gray-500 hover:text-burgundy transition-colors"
                     >
                     ← {t('rsvp.edit')}
@@ -480,8 +517,8 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             {/* Success */}
             {currentStep === STEPS.SUCCESS && (
                 <div className="text-center py-8">
-                <div className="text-6xl mb-6">🎉</div>
-                <h3 className="font-serif text-3xl text-burgundy mb-4">{t('rsvp.thank_you')}</h3>
+                <div className="text-6xl mb-6" aria-hidden="true">🎉</div>
+                <h3 {...stepHeadingProps} className="font-serif text-3xl text-burgundy mb-4 focus:outline-none">{t('rsvp.thank_you')}</h3>
                 <p className="text-gray-600 mb-2">{t('rsvp.your_rsvp_has_been_received')}</p>
                 <p className="text-gray-600">{t('rsvp.we_cannot_wait_to_celebrate_with_you')}</p>
                 </div>
@@ -490,8 +527,8 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
             {/* Declined */}
             {currentStep === STEPS.DECLINED && (
                 <div className="text-center py-8">
-                <div className="text-6xl mb-6">💝</div>
-                <h3 className="font-serif text-3xl text-burgundy mb-4">{t('rsvp.we_will_miss_you')}</h3>
+                <div className="text-6xl mb-6" aria-hidden="true">💝</div>
+                <h3 {...stepHeadingProps} className="font-serif text-3xl text-burgundy mb-4 focus:outline-none">{t('rsvp.we_will_miss_you')}</h3>
                 <p className="text-gray-600 mb-2">{t('rsvp.thank_you_for_letting_us_know')}</p>
                 <p className="text-gray-600">{t('rsvp.you_will_be_in_our_hearts_for_this_special_day')}</p>
                 </div>

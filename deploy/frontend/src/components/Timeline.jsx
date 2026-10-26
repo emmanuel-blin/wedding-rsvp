@@ -94,7 +94,7 @@ export default function Timeline({ timeline }) {
                     </div>
 
                     {/* Center Icon */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 md:w-12 md:h-12 bg-gold rounded-full flex items-center justify-center text-white z-10 shadow-lg">
+                    <div aria-hidden="true" className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 md:w-12 md:h-12 bg-gold rounded-full flex items-center justify-center text-white z-10 shadow-lg">
                     {event.icon}
                     </div>
 

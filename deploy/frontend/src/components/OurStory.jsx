@@ -51,9 +51,9 @@ export default function OurStory({ stories, ourStory }) {
                 <div className="overflow-hidden rounded-sm mb-6 shadow-lg shadow-gray-500">
                     <img
                     src={story.image}
-                    alt={story.title}
+                    alt=""
                     loading="lazy"
-                    className="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-64 md:h-80 object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
                     />
                 </div>
 
