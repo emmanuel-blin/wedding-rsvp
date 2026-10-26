@@ -121,6 +121,7 @@ wedding-rsvp/
 │   │       ├── admin-setup.php      # Registered settings
 │   │       ├── admin-settings.php   # wp-admin "Wedding" settings tabs
 │   │       └── includes/
+│   │           ├── themes.php       # Color themes (palettes) picked in wp-admin
 │   │           ├── api-read.php     # GET /settings, /stories
 │   │           ├── api-rsvp.php     # POST /rsvp, /validate-code, nightly digest email, SMTP
 │   │           ├── rsvp-type.php    # RSVP post type + admin columns
@@ -195,7 +196,7 @@ All endpoints under `/wp-json/wedding/v1/`:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/settings` | GET | Wedding settings (dates, venue, etc.) |
+| `/settings` | GET | Wedding settings (color theme, dates, venue, etc.) |
 | `/stories` | GET | Our Story posts |
 | `/validate-code` | POST | Validate access code |
 | `/rsvp` | POST | Submit RSVP (saved as an RSVP post, included in the next [nightly digest](#rsvp-digest-email)) |
@@ -212,6 +213,24 @@ Manage in WordPress Admin → Wedding → RSVP → **Access Codes** (one per lin
 - A visitor who sends 20 wrong codes within 15 minutes is blocked for a while (right codes are never counted, other visitors are not affected). Behind a tunnel or proxy on a private address, the visitor address comes from the `CF-Connecting-IP` header.
 - One code is shared by all guests: anyone holding it could answer in another guest's name. A resubmission with the same code and the same guest names replaces the previous answer (no double counting). A code per invitation is on the backlog.
 - An RSVP accepts at most 20 guests, names up to 80 characters, dietary notes up to 1000 and a song request up to 200.
+Manage in WordPress Admin → Wedding Settings:
+
+| Code | Purpose |
+|------|---------|
+| `TEST123` | Testing |
+| `LOVE2025` | Guest invite |
+| `WEDDING` | Guest invite |
+
+---
+
+## Color Theme
+
+Pick it in WordPress Admin → Wedding Settings → **General** → **Colors**: one round button per theme, the circle shows the main color and its border the accent color. **Classic Bordeaux** (the original colors) is the default; the others are Sage Garden, Midnight Blush, Terracotta Sun, Black Tie and Dusty Blue. The change shows on the next page load, no rebuild needed.
+
+- The palettes live in `deploy/wp-plugins/wedding-rsvp-api/includes/themes.php`. Adding one = one entry there (id, name, 5 colors), nothing to change in the frontend.
+- `GET /settings` returns `theme: { id, name, colors: { primary, onPrimary, accent, secondary, surface } }`; the frontend sets them as the Tailwind color variables (`--color-*`) on `<html>`, and `index.css` keeps the Classic values as fallback.
+- Color roles: the **main** color for headings, buttons and the footer; the **accent** stays decorative on light backgrounds (lines, borders, fills) and gets main-color text when used as a button; the **secondary** color is for subtitles, selected options and hover states. Classic and Terracotta use a gold accent, Midnight a blush, Sage Garden a dry straw accent with olive text (country look), Dusty Blue a peach blush, Black Tie silver.
+- Every palette is checked for contrast (WCAG AA 4.5:1) before being added: main color on the page background, white and light text on the main color, secondary text on the background, on white and on a selected option (accent at 10% over the background), and main color on the accent. Classic's secondary color is slightly deeper than the original (`#a35663` instead of `#b76e79`, which was 3.65:1).
 
 ---
 
@@ -469,6 +488,9 @@ docker compose up -d --force-recreate frontend wordpress
 - **Headless hardening**: XML-RPC answers `403`, sitemaps and the public user list (`/wp/v2/users`, `?author=`) are off for visitors who are not logged in, "Lost your password?" is limited to 3 requests per hour per visitor and per account. `wordpress-setup.sh` also closes comments and pings, removes the sample post/page, deactivates WPGraphQL when the flag is off, refuses `CHANGE_ME` admin passwords on the first install and warns if the admin user is missing. The plugin, the themes and the generated headless theme declare `Update URI: false` (no WordPress.org update offers for their names).
 - **Frontend**: the Google Maps iframes no longer send the full page URL (and the invite code) as Referer; the invite code is read from the QR link, kept in `sessionStorage` and removed from the address bar.
 - **Deployment**: install guard (must-use plugin) against a web install before the setup script ran, working WordPress healthcheck, `BIND_ADDR` for the published ports.
+
+### 1.3.0
+- **Color themes**: 6 palettes picked in Wedding → Settings → General → Colors (round buttons: main color + accent border), stored in the `wedding_theme` option (unknown values fall back to `classic`), returned as `theme` by `GET /settings` and applied by the frontend as CSS variables. Classic Bordeaux keeps the original colors with a deeper secondary color for contrast. The site no longer puts white text on the accent or accent-colored text on light backgrounds: accent buttons and Timeline icons use the main color, selected options and hovers use the secondary color, so every palette reaches 4.5:1.
 
 ### 1.2.1
 - **Nightly digest email** for the hosts replaces the email sent on each RSVP (none was actually sent before: the WordPress image has no sendmail). New RSVPs are saved with `notified=0`, the WP-Cron event `wedding_rsvp_digest` emails them once a night at `WEDDING_DIGEST_HOUR` and flips them to `1` only if sending worked. The event is rescheduled by itself when the hour, the timezone or DST changes, and cleared when the plugin is deactivated. `wordpress-entrypoint.sh` now triggers WP-Cron every 5 minutes from inside the WordPress container, so it doesn't depend on site visits (no extra service). A lock (`wedding_digest_lock` option, taken over after 10 minutes) prevents the nightly run and the button from sending the same RSVPs twice.

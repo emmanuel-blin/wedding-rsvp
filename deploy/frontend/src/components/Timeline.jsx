@@ -63,44 +63,37 @@ export default function Timeline({ timeline }) {
     ];
 
     return (
-        <section className="py-16 md:py-24 bg-cream">
+        <section className="py-16 md:py-24 bg-surface">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
             <div className="text-center mb-16">
-            <p className="text-rose-gold tracking-[0.3em] uppercase text-sm mb-2">{displayTimelineSubtitle}</p>
-            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-burgundy">{displayTimelineTitle}</h2>
-            <div className="mt-4 w-24 h-[1px] bg-gold mx-auto"></div>
+            <p className="text-secondary tracking-[0.3em] uppercase text-sm mb-2">{displayTimelineSubtitle}</p>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary">{displayTimelineTitle}</h2>
+            <div className="mt-4 w-24 h-px bg-accent mx-auto"></div>
             </div>
 
-            {/* Timeline */}
             <div className="relative">
-            {/* Vertical Line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gold/30 transform -translate-x-1/2"></div>
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-accent/30 transform -translate-x-1/2"></div>
 
-            {/* Events */}
             <div className="space-y-12">
                 {events.map((event, index) => (
-                <div 
+                <div
                     key={event.time}
                     className={`relative flex items-center ${
                     index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
                     }`}
                 >
-                    {/* Time Badge */}
                     <div className={`w-1/2 ${index % 2 === 0 ? 'text-right pr-8 md:pr-12' : 'text-left pl-8 md:pl-12'}`}>
-                    <span className="inline-block px-3 py-1 md:px-4 md:py-2 bg-burgundy text-white font-serif text-lg md:text-xl rounded-sm">
+                    <span className="inline-block px-3 py-1 md:px-4 md:py-2 bg-primary text-white font-serif text-lg md:text-xl rounded-sm">
                         {event.time}
                     </span>
                     </div>
 
-                    {/* Center Icon */}
-                    <div aria-hidden="true" className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 md:w-12 md:h-12 bg-gold rounded-full flex items-center justify-center text-white z-10 shadow-lg">
+                    <div aria-hidden="true" className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 md:w-12 md:h-12 bg-accent rounded-full flex items-center justify-center text-primary z-10 shadow-lg">
                     {event.icon}
                     </div>
 
-                    {/* Content */}
                     <div className={`${index % 2 === 0 ? 'pl-8 md:pl-12' : 'pr-8 md:pr-12'}`}>
-                    <h3 className="font-serif text-lg md:text-2xl text-burgundy mb-1 leading-tight">{event.title}</h3>
+                    <h3 className="font-serif text-lg md:text-2xl text-primary mb-1 leading-tight">{event.title}</h3>
                     <p className="text-gray-500 text-sm md:text-base">{event.location}</p>
                     </div>
                 </div>

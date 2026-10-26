@@ -4,17 +4,17 @@
     --font-serif: "Playfair Display", serif;
     --font-sans: "Inter", "Montserrat", sans-serif;
 
-    --color-cream: #fdfaf5;
-    --color-champagne: #f7e7ce;
-    --color-rose-gold: #b76e79;
-    --color-burgundy: #800020;
-    --color-navy: #000080;
-    --color-gold: #d4af37;
+    /* Classic Bordeaux, overridden at runtime by the wp-admin theme */
+    --color-primary: #800020;
+    --color-on-primary: #f7e7ce;
+    --color-accent: #d4af37;
+    --color-secondary: #a35663;
+    --color-surface: #fdfaf5;
     }
 
     @layer base {
     body {
-        @apply bg-cream text-gray-900 font-sans antialiased;
+        @apply bg-surface text-gray-900 font-sans antialiased;
     }
 
     h1, h2, h3, h4, h5, h6 {

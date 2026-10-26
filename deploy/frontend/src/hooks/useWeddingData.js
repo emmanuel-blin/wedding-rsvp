@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { applyTheme } from '../utils/theme';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -18,7 +19,10 @@ export default function useWeddingData() {
                 ]);
 
                 if (settingsRes.ok) {
-                    setSettings(await settingsRes.json());
+                    const data = await settingsRes.json();
+                    // Before render: no flash of the default colors
+                    applyTheme(data.theme);
+                    setSettings(data);
                 } else {
                     throw new Error('Failed to load settings');
                 }
