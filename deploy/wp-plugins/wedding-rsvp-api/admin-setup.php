@@ -57,6 +57,11 @@ function wedding_add_admin_menu() {
  */
 add_action('admin_init', 'wedding_register_settings');
 function wedding_register_settings() {
+    register_setting('wedding_settings', 'wedding_theme', [
+        'sanitize_callback' => 'wedding_sanitize_theme',
+        'default' => 'classic',
+    ]);
+
     register_setting('wedding_settings', 'wedding_hero_image');
     register_setting('wedding_settings', 'wedding_hero_subtitle');
     register_setting('wedding_settings', 'wedding_hero_title');
@@ -164,8 +169,7 @@ function wedding_handle_send_digest() {
         $status = $result === 0 ? 'empty' : 'sent';
     }
 
-    // Passed through a short transient, not the URL, so the notice shows only once
-    // (a URL parameter would come back after the next "Save Settings")
+    // Transient, not a URL parameter: the notice shows only once
     set_transient(
         'wedding_email_notice_' . get_current_user_id(),
         ['status' => $status, 'count' => (int) $result],

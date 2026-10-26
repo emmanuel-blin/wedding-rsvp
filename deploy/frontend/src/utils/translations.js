@@ -83,6 +83,10 @@ export const translations = {
         error_code: "Code invalide. Veuillez vérifier votre invitation.",
         error_general: "Une erreur est survenue. Veuillez réessayer.",
         },
+        meta: {
+        title: "Mariage de {{name1}} & {{name2}} | {{date}}",
+        description: "Rejoignez-nous pour célébrer le mariage de {{name1}} et {{name2}} le {{date}}. Répondez à l'invitation pour faire partie de ce grand jour.",
+        },
         common: {
         loading: "Chargement...",
         back: "Retour",
@@ -195,6 +199,10 @@ export const translations = {
         you_will_be_in_our_hearts_for_this_special_day: "You'll be in our hearts on this special day.",
         error_code: "Invalid code. Please check your invitation.",
         error_general: "An error occurred. Please try again.",
+        },
+        meta: {
+        title: "{{name1}} & {{name2}} Wedding | {{date}}",
+        description: "Join us as we celebrate the wedding of {{name1}} and {{name2}} on {{date}}. RSVP to be part of our special day.",
         },
         common: {
         loading: "Loading...",

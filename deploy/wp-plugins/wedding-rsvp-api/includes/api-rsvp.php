@@ -27,7 +27,6 @@ function wedding_validate_access_code($request) {
     $params = $request->get_json_params();
     $code = strtoupper(sanitize_text_field($params['code'] ?? ''));
 
-    // Get valid codes from settings
     $valid_codes = wedding_get_valid_codes();
 
     if (in_array($code, $valid_codes)) {
@@ -50,7 +49,6 @@ function wedding_validate_access_code($request) {
 function wedding_handle_rsvp_submission($request) {
     $params = $request->get_json_params();
 
-    // Validate access code
     $code = strtoupper(sanitize_text_field($params['accessCode'] ?? ''));
     $valid_codes = wedding_get_valid_codes();
 
@@ -58,10 +56,8 @@ function wedding_handle_rsvp_submission($request) {
         return new WP_Error('invalid_code', 'Invalid access code', ['status' => 403]);
     }
 
-    // Sanitize data
     $attendance = sanitize_text_field($params['attendance'] ?? '');
-    // Guests: keep only first/last name and a known age category, drop rows without a name
-    // (full "name" kept too, for the post title and the digest)
+    // Keep first/last/full name and a known age category, drop unnamed rows
     $age_categories = ['adult', 'teen', 'child', 'baby'];
     $guests = [];
     foreach (is_array($params['guests'] ?? null) ? $params['guests'] : [] as $guest) {
@@ -70,7 +66,7 @@ function wedding_handle_rsvp_submission($request) {
         }
         $first_name = sanitize_text_field($guest['firstName'] ?? '');
         $last_name = sanitize_text_field($guest['lastName'] ?? '');
-        // Old shape ({name}) from a form loaded before the first/last name split
+        // Old {name} shape from a form loaded before the name split
         if ($first_name === '' && $last_name === '') {
             $first_name = sanitize_text_field($guest['name'] ?? '');
         }
@@ -97,11 +93,9 @@ function wedding_handle_rsvp_submission($request) {
     $dietary_restrictions = sanitize_textarea_field($params['dietaryRestrictions'] ?? '');
     $song_request = sanitize_text_field($params['songRequest'] ?? '');
 
-    // Build guest names for title
     $guest_names = array_column($guests, 'name');
     $title = implode(', ', $guest_names);
 
-    // Create RSVP post
     $post_id = wp_insert_post([
         'post_type' => 'wedding_rsvp',
         'post_title' => $title,
@@ -117,7 +111,7 @@ function wedding_handle_rsvp_submission($request) {
             'dietary_restrictions' => $dietary_restrictions,
             'song_request' => $song_request,
             'submitted_at' => current_time('mysql'),
-            // Picked up by the nightly digest email (wedding_send_rsvp_digest)
+            // Picked up by the nightly digest
             'notified' => '0',
         ],
     ]);
@@ -134,9 +128,7 @@ function wedding_handle_rsvp_submission($request) {
 }
 
 /**
- * Nightly digest: one email to the hosts with the RSVPs received since the last one.
- * WP-Cron only runs on page visits: wordpress-entrypoint.sh calls wp-cron.php
- * every 5 minutes so the digest goes out on time.
+ * Nightly digest email to the hosts (WP-Cron, triggered every 5 min by wordpress-entrypoint.sh)
  */
 add_action('init', 'wedding_schedule_rsvp_digest');
 function wedding_schedule_rsvp_digest() {
@@ -173,15 +165,11 @@ function wedding_get_digest_recipients() {
 }
 
 /**
- * Send the digest. Returns the number of RSVPs sent, 0 if there was nothing new,
- * false if sending failed, null if another send is already running.
- * Run by WP-Cron and by the "Send email now" button.
+ * Send the digest: RSVPs sent, 0 if none, false on failure, null if already running
  */
 add_action('wedding_rsvp_digest', 'wedding_send_rsvp_digest');
 function wedding_send_rsvp_digest() {
-    // Lock so the nightly run and the button never email the same RSVPs twice:
-    // add_option() fails when the row exists. A lock older than 10 minutes is left
-    // over from a run that crashed, so it is taken over.
+    // Lock against double sends (add_option fails if it exists); over 10 min old = stale
     if (!add_option('wedding_digest_lock', time(), '', 'no')) {
         if (time() - (int) get_option('wedding_digest_lock') < 10 * MINUTE_IN_SECONDS) {
             return null;
@@ -197,7 +185,7 @@ function wedding_send_rsvp_digest() {
 }
 
 /**
- * Helper: build and send the digest (call wedding_send_rsvp_digest, which holds the lock)
+ * Helper: build and send the digest (call it through wedding_send_rsvp_digest for the lock)
  */
 function wedding_build_and_send_digest() {
     $rsvps = get_posts([
@@ -209,7 +197,7 @@ function wedding_build_and_send_digest() {
         'meta_value' => '0',
     ]);
     if (!$rsvps) {
-        return 0; // Nothing new: no email
+        return 0;
     }
 
     $new_attending = 0;
@@ -240,7 +228,7 @@ function wedding_build_and_send_digest() {
         $message .= "Submitted: " . get_the_date('F j, Y g:i a', $rsvp) . "\n\n";
     }
 
-    // Running totals over every RSVP, so the hosts know where they stand
+    // Running totals over every RSVP
     $total_guests = 0;
     $total_declined = 0;
     $all_ids = get_posts(['post_type' => 'wedding_rsvp', 'posts_per_page' => -1, 'fields' => 'ids']);
@@ -264,7 +252,7 @@ function wedding_build_and_send_digest() {
 
     $recipients = wedding_get_digest_recipients();
     if (!wp_mail($recipients, $subject, $header . $message . $footer)) {
-        // Left as not notified: retried at the next run. The RSVPs are visible in wp-admin anyway
+        // Left as not notified: retried at the next run
         error_log('Wedding RSVP: digest email to ' . implode(', ', $recipients) . " failed ({$count} RSVPs, retried next run)");
         return false;
     }
@@ -276,8 +264,7 @@ function wedding_build_and_send_digest() {
 }
 
 /**
- * Send emails through SMTP when WEDDING_SMTP_HOST is set (docker-compose.yml).
- * The wordpress image has no sendmail, so without SMTP wp_mail() always fails.
+ * SMTP from WEDDING_SMTP_* (the wordpress image has no sendmail)
  */
 add_action('phpmailer_init', 'wedding_configure_smtp');
 function wedding_configure_smtp($phpmailer) {

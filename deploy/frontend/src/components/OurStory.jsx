@@ -31,13 +31,12 @@ export default function OurStory({ stories, ourStory }) {
     const displayOurStorySubtitle = ourStory?.subtitle || t('defaults.story_subtitle');
 
     return (
-        <section className="py-16 md:py-24 bg-cream">
+        <section className="py-16 md:py-24 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
             <div className="text-center mb-16">
-            <p className="text-rose-gold tracking-[0.3em] uppercase text-sm mb-2">{displayOurStorySubtitle}</p>
-            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-burgundy">{displayOurStoryTitle}</h2>
-            <div className="mt-4 w-24 h-[1px] bg-gold mx-auto"></div>
+            <p className="text-secondary tracking-[0.3em] uppercase text-sm mb-2">{displayOurStorySubtitle}</p>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary">{displayOurStoryTitle}</h2>
+            <div className="mt-4 w-24 h-px bg-accent mx-auto"></div>
             </div>
 
             {/* Story Grid */}
@@ -47,7 +46,6 @@ export default function OurStory({ stories, ourStory }) {
                 key={story.title || index}
                 className={`group ${index % 2 === 1 ? 'md:mt-12' : ''}`}
                 >
-                {/* Image */}
                 <div className="overflow-hidden rounded-sm mb-6 shadow-lg shadow-gray-500">
                     <img
                     src={story.image}
@@ -56,9 +54,7 @@ export default function OurStory({ stories, ourStory }) {
                     className="w-full h-64 md:h-80 object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
                     />
                 </div>
-
-                {/* Text */}
-                <h3 className="font-serif text-2xl text-burgundy mb-3">{story.title}</h3>
+                <h3 className="font-serif text-2xl text-primary mb-3">{story.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{story.text}</p>
                 </div>
                 ))}

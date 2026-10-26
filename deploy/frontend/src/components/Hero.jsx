@@ -55,49 +55,46 @@ function calculateTimeLeft(weddingDate) {
 
         {/* Content */}
         <div className="relative text-center text-white px-4">
-            {/* Names */}
-            <p className="text-champagne tracking-[0.3em] uppercase text-sm md:text-base mb-4">
+            <p className="text-on-primary tracking-[0.3em] uppercase text-sm md:text-base mb-4">
             {displayHeroSubtitle}
             </p>
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-2 tracking-wide">
             {displayNames[0]} & {displayNames[1]}
             </h1>
-            <p className="text-champagne tracking-[0.2em] uppercase text-lg md:text-xl mb-4">
+            <p className="text-on-primary tracking-[0.2em] uppercase text-lg md:text-xl mb-4">
             {displayHeroTitle}
             </p>
-            <p className="text-champagne tracking-[0.2em] uppercase text-xl md:text-2xl mb-8">
+            <p className="text-on-primary tracking-[0.2em] uppercase text-xl md:text-2xl mb-8">
             {formattedDate}
             </p>
 
-            {/* Countdown */}
             <div className="flex justify-center gap-2 md:gap-8 mb-12">
             <div className="text-center">
-                <div className="text-4xl md:text-6xl font-serif text-gold">{timeLeft.days}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-champagne/80">{t('hero.countdown_days')}</div>
+                <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.days}</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_days')}</div>
             </div>
-            <div className="text-3xl md:text-5xl font-light text-gold/60">:</div>
+            <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
-                <div className="text-4xl md:text-6xl font-serif text-gold">{timeLeft.hours}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-champagne/80">{t('hero.countdown_hours')}</div>
+                <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.hours}</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_hours')}</div>
             </div>
-            <div className="text-3xl md:text-5xl font-light text-gold/60">:</div>
+            <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
-                <div className="text-4xl md:text-6xl font-serif text-gold">{timeLeft.minutes}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-champagne/80">{t('hero.countdown_minutes')}</div>
+                <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.minutes}</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_minutes')}</div>
             </div>
-            <div className="text-3xl md:text-5xl font-light text-gold/60">:</div>
+            <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
-                <div className="text-4xl md:text-6xl font-serif text-gold">{timeLeft.seconds}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-champagne/80">{t('hero.countdown_seconds')}</div>
+                <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.seconds}</div>
+                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_seconds')}</div>
             </div>
             </div>
 
-            {/* CTA Button */}
             <button
             onClick={onRSVPClick}
             className="group relative inline-flex items-center justify-center px-10 py-4 text-sm
-                        md:text-base font-medium tracking-[0.2em] uppercase text-white border-2 border-gold rounded-lg bg-transparent overflow-hidden transition-all duration-500
-                        hover:text-burgundy hover:border-gold hover:bg-gold motion-safe:hover:scale-105 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                        md:text-base font-medium tracking-[0.2em] uppercase text-white border-2 border-accent rounded-lg bg-transparent overflow-hidden transition-all duration-500
+                        hover:text-primary hover:border-accent hover:bg-accent motion-safe:hover:scale-105 hover:shadow-[0_0_30px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]"
             >
             <span className="relative z-10">{t('hero.rsvp_now')}</span>
             </button>
@@ -105,7 +102,7 @@ function calculateTimeLeft(weddingDate) {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 motion-safe:animate-bounce">
-            <svg className="w-6 h-6 text-champagne/60" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-on-primary/60" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
         </div>

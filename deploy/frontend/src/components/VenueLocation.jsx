@@ -42,9 +42,8 @@ export default function VenueLocation({
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16 items-center last:mb-0">
-        {/* Map */}
         <div className={`relative ${mapOrder === "rtl" ? "lg:order-2" : ""}`}>
-            <div className="relative overflow-hidden rounded-sm shadow-sm border border-champagne/20">
+            <div className="relative overflow-hidden rounded-sm shadow-sm border border-on-primary/20">
             <iframe
                 src={`https://maps.google.com/maps?q=${encodedAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                 className="w-full h-64 md:h-96 pointer-events-none md:pointer-events-auto"
@@ -57,22 +56,19 @@ export default function VenueLocation({
             </div>
         </div>
 
-        {/* Details */}
         <div className={`flex flex-col justify-center ${mapOrder === "rtl" ? "lg:order-1" : ""}`}>
-            <h3 className="font-serif text-2xl md:text-3xl text-burgundy mb-4">{title}</h3>
+            <h3 className="font-serif text-2xl md:text-3xl text-primary mb-4">{title}</h3>
             {description && (
             <p className="text-gray-600 mb-6 leading-relaxed">
                 {description}
             </p>
             )}
 
-            {/* Address */}
-            <div className="bg-cream p-6 rounded-sm mb-6">
+            <div className="bg-surface p-6 rounded-sm mb-6">
             <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">{t('location.address')}</p>
             <p className="text-gray-800 select-all">{address}</p>
             </div>
 
-            {/* Getting There */}
             {gettingThere.length > 0 && (
             <div className="mb-8">
                 <p className="text-sm text-gray-500 uppercase tracking-wider mb-3">{t('location.getting_there')}</p>
@@ -87,7 +83,6 @@ export default function VenueLocation({
             </div>
             )}
 
-            {/* Navigation Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {mapLinks.map((link) => (
                 <a
@@ -95,7 +90,7 @@ export default function VenueLocation({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-4 py-3 shadow-md hover:shadow-xl border-2 border-transparent hover:border-gold text-burgundy hover:text-gold rounded-sm transition-all duration-300 text-sm uppercase tracking-wider bg-cream active:bg-white hover:bg-white "
+                className="flex items-center justify-center gap-2 px-4 py-3 shadow-md hover:shadow-xl border-2 border-transparent hover:border-secondary text-primary hover:text-secondary rounded-sm transition-all duration-300 text-sm uppercase tracking-wider bg-surface active:bg-white hover:bg-white "
                 >
                 <span aria-hidden="true">{link.icon}</span>
                 {link.name}

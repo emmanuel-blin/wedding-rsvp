@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import '../utils/translations';
 
-// Defined once, outside the component, so it is not rebuilt on every render
+// Outside the component: not rebuilt on every render
 const BOOKING_SERVICES = [
     {
         name: 'Airbnb',
@@ -35,19 +35,15 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
     return (
         <section>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
             <div className="text-center mb-12">
-            <h3 className="font-sans text-rose-gold tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</h3>
-            <div className="mt-4 w-24 h-[1px] bg-gold mx-auto"></div>
+            <h3 className="font-sans text-secondary tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</h3>
+            <div className="mt-4 w-24 h-px bg-accent mx-auto"></div>
             </div>
-
-            {/* Description */}
             <div className="text-center mb-12 max-w-2xl mx-auto">
             <p className="text-gray-600 text-lg leading-relaxed">{description}</p>
-            <p className="text-burgundy font-medium mt-4">{venueName}</p>
+            <p className="text-primary font-medium mt-4">{venueName}</p>
             </div>
 
-            {/* Booking Links */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {BOOKING_SERVICES.map((service) => (
                 <a
@@ -55,18 +51,18 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
                 href={service.getUrl(venueName)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-4 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gold bg-cream hover:bg-white active:bg-white"
+                className="group flex items-center gap-4 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-secondary bg-surface hover:bg-white active:bg-white"
                 >
                 <div aria-hidden="true" className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-colors duration-300">
                     {service.icon}
                 </div>
                 <div className="flex-1">
-                    <h4 className="font-serif text-xl text-burgundy group-hover:text-gold transition-colors duration-300">{service.name}</h4>
+                    <h4 className="font-serif text-xl text-primary group-hover:text-secondary transition-colors duration-300">{service.name}</h4>
                     <p className="text-sm text-gray-500">{t('defaults.sleep_search_near', { venueName })}</p>
                 </div>
                 <svg
                     aria-hidden="true"
-                    className="w-5 h-5 text-gray-400 group-hover:text-gold transition-all duration-300 transform motion-safe:group-hover:translate-x-1"
+                    className="w-5 h-5 text-gray-400 group-hover:text-secondary transition-all duration-300 transform motion-safe:group-hover:translate-x-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

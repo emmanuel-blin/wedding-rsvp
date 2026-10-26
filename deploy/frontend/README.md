@@ -82,16 +82,30 @@ Add/remove codes in **Wedding Settings > RSVP** tab in WordPress admin.
 
 ## Customization
 
+### Page title
+The browser tab title and the description are built from the couple names and the date set in wp-admin (Wedding → Settings → General), in the site language (`meta.title` / `meta.description` in `translations.js`). `index.html` only holds a neutral fallback. Link previews (WhatsApp, Messenger…) read the HTML without running the app, so they show that fallback.
+
 ### Colors & Theme
-Edit `src/index.css`:
+The hosts pick a color theme in wp-admin (Wedding → Settings → General → Colors). `GET /settings` returns it as `theme.colors`, and `src/utils/theme.js` sets each color as the matching Tailwind variable on `<html>` (`--color-primary`, `--color-on-primary`, `--color-accent`, `--color-secondary`, `--color-surface`) before the page renders. Tokens are named by role, not by color, and components only use these names (`bg-primary`, `text-accent/80`…), so they follow the theme with no rebuild; avoid hardcoded colors (use `var(--color-accent)` in arbitrary values).
+
+The last theme is remembered in the browser (`localStorage`, optional), so the loading screen of a later visit already uses it; on a first visit the loader is neutral (white/gray) instead of flashing the Classic colors.
+
+`src/index.css` keeps the Classic values as fallback:
 ```css
 @theme {
-  --color-burgundy: #800020;
-  --color-gold: #c4a12eff;
-  --color-cream: #fdfaf5;
+  --color-primary: #800020;
+  --color-on-primary: #f7e7ce;
+  --color-accent: #d4af37;
+  --color-secondary: #a35663;
+  --color-surface: #fdfaf5;
 }
 ```
-Keep text readable when changing colors (WCAG AA: 4.5:1 for normal text, 3:1 for large text and field borders). The current `gold` is only 2.1:1 against white, so it should not carry white or small text (buttons, selected options); this is planned with the v2 theme palettes.
+New palettes are added in the plugin (`includes/themes.php`), not here. Color roles in the components, so every palette stays readable (WCAG AA 4.5:1):
+- `primary`: headings, buttons, footer, and text/icons placed on the accent (`bg-accent text-primary`).
+- `on-primary`: light text on `primary` (footer, hero).
+- `accent`: decorative only on light backgrounds (lines, borders, progress fill, selected-option tint `bg-accent/10`); as text only over the dark hero photo. Never `text-white` on it.
+- `secondary`: subtitles, selected options, hover text and hover borders (`hover:text-secondary`).
+- `surface`: page background.
 
 ---
 
@@ -154,12 +168,12 @@ The RSVP form, this will be the one that will let you know who is comming (/or i
 
 ## Accessibility
 Guests mostly answer on phones and some are older relatives, so the site follows WCAG 2.2 AA where the code allows it (audit with the `/a11y-check` skill):
-- **Form fields:** every field has a label (`aria-label` or `htmlFor`), required names use `aria-required`, the meal/allergen choices are `fieldset`/`legend` groups with `aria-pressed` buttons, each guest row is a group named "Invité N". Field borders (`gray-500`) and the focus ring (burgundy) are at least 3:1 on cream. The access code can be submitted with Enter.
+- **Form fields:** every field has a label (`aria-label` or `htmlFor`), required names use `aria-required`, the meal/allergen choices are `fieldset`/`legend` groups with `aria-pressed` buttons, each guest row is a group named "Invité N". Field borders (`gray-500`) and the focus ring (`primary`) are at least 3:1 on the page background. The access code can be submitted with Enter.
 - **Step changes:** when the guest moves to another RSVP step, focus goes to that step's heading, so screen readers announce it (including the thank-you and declined screens). Not on page load, so a `?code=` link does not jump to the form.
 - **Phones:** in the guest step the age and remove controls sit under the names; the remove button is a 44px target.
 - **Motion:** zoom, bounce and slide effects only run when the device does not ask for reduced motion (`motion-safe:`).
 - **Page:** `<html lang="fr">` (to be updated at runtime with the v2 language toggle), one `<main>` landmark, decorative icons and emoji hidden from screen readers.
-- **Still to do (v2 theme palettes):** text contrast of `gold` (buttons, selected options, hover text), `gray-400` step text and `rose-gold` subtitles.
+- **Colors:** every theme passes 4.5:1 for text (see Colors & Theme for the color roles); the step text uses `gray-500`.
 
 ## Troubleshooting
 

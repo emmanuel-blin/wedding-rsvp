@@ -39,6 +39,7 @@ function wedding_get_settings() {
     $time = get_option('wedding_time', '14:00');
 
     return rest_ensure_response([
+        'theme' => wedding_get_theme(),
         'weddingDate' => $date . 'T' . $time . ':00',
         'coupleNames' => [
             get_option('wedding_couple_name1', 'Emma'),

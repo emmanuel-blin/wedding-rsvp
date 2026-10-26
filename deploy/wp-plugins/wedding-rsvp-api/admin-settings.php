@@ -40,6 +40,41 @@
     margin-top: 30px;
     border-top: 1px solid #c3c4c7;
 }
+/* Theme picker: radio inputs shown as round swatches */
+.wedding-settings-wrap .wedding-themes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.wedding-settings-wrap .wedding-theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 96px;
+    cursor: pointer;
+    text-align: center;
+}
+.wedding-settings-wrap .wedding-theme-swatch {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 6px solid;
+    box-sizing: border-box;
+}
+.wedding-settings-wrap .wedding-theme-option input:checked + .wedding-theme-swatch {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px #1d2327;
+}
+.wedding-settings-wrap .wedding-theme-option input:focus-visible + .wedding-theme-swatch {
+    outline: 2px solid #2271b1;
+    outline-offset: 6px;
+}
+.wedding-settings-wrap .wedding-theme-option input:checked ~ .wedding-theme-name {
+    font-weight: 600;
+}
 .wedding-settings-wrap .image-preview {
     max-width: 300px;
     margin-top: 10px;
@@ -82,6 +117,23 @@
         <?php settings_fields('wedding_settings'); ?>
 
         <div id="tab-general" class="tab-panel active">
+            <div class="section-header">
+                <span class="section-icon">🎨</span>
+                <h3>Colors</h3>
+            </div>
+            <p class="description">Pick the colors of your website. The circle shows the main color, its border the accent color.</p>
+            <?php $current_theme = wedding_get_theme()['id']; ?>
+            <fieldset class="wedding-themes">
+                <legend class="screen-reader-text">Color theme</legend>
+                <?php foreach (wedding_theme_palettes() as $theme_id => $palette): ?>
+                    <label class="wedding-theme-option">
+                        <input type="radio" name="wedding_theme" value="<?= esc_attr($theme_id); ?>" class="screen-reader-text" <?php checked($current_theme, $theme_id); ?>>
+                        <span class="wedding-theme-swatch" aria-hidden="true" style="background: <?= esc_attr($palette['colors']['primary']); ?>; border-color: <?= esc_attr($palette['colors']['accent']); ?>;"></span>
+                        <span class="wedding-theme-name"><?= esc_html($palette['name']); ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </fieldset>
+
             <div class="section-header">
                 <span class="section-icon">📅</span>
                 <h3>Date & Time</h3>
