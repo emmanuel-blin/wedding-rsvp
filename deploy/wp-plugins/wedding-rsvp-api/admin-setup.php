@@ -23,7 +23,8 @@ function wedding_register_story_post_type() {
         'show_in_menu' => 'wedding-settings',
         'menu_icon' => 'dashicons-format-gallery',
         'supports' => ['title', 'editor', 'thumbnail'],
-        'capability_type' => 'post',
+        'capability_type' => ['wedding_story', 'wedding_stories'],
+        'map_meta_cap' => true,
     ]);
 }
 
@@ -35,7 +36,7 @@ function wedding_add_admin_menu() {
     add_menu_page(
         'Wedding Settings',
         'Wedding',
-        'manage_options',
+        'manage_wedding',
         'wedding-settings',
         'wedding_settings_page',
         'dashicons-heart',
@@ -46,11 +47,16 @@ function wedding_add_admin_menu() {
         'wedding-settings',
         'Settings',
         'Settings',
-        'manage_options',
+        'manage_wedding',
         'wedding-settings',
         'wedding_settings_page'
     );
 }
+
+// The settings form saves through options.php, which asks for this capability
+add_filter('option_page_capability_wedding_settings', function () {
+    return 'manage_wedding';
+});
 
 /**
  * Register Settings
@@ -150,7 +156,7 @@ function wedding_sanitize_email_lines($value) {
  */
 add_action('admin_post_wedding_send_digest', 'wedding_handle_send_digest');
 function wedding_handle_send_digest() {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('manage_wedding')) {
         wp_die('You are not allowed to do this.', '', ['response' => 403]);
     }
     check_admin_referer('wedding_send_digest');

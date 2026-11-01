@@ -35,7 +35,7 @@ npm run dev
 npm run build && npm run preview
 ```
 
-Visit: `http://localhost:5173/?code=TEST123`
+Visit: `http://localhost:5173/?code=YOUR-CODE` (a code you set in Wedding → RSVP → Access Codes)
 
 ---
 
@@ -68,15 +68,7 @@ frontend/
 
 ## Access Codes
 
-| Code | Purpose |
-|------|---------|
-| `TEST123` | Testing / Development |
-| `LOVE2025` | Guest invite |
-| `WEDDING` | Guest invite |
-| `EMMA2025` | Guest invite |
-| `JOHN2025` | Guest invite |
-
-Add/remove codes in **Wedding Settings > RSVP** tab in WordPress admin.
+There is no built-in code: add yours in **Wedding > RSVP > Access Codes** in WordPress admin (until then nobody can send an RSVP). The code comes from the invitation link (`/?code=...`, e.g. the QR code of the paper invitation) or is typed in the first step of the form. `App.jsx` keeps it in `sessionStorage` for the visit and removes it from the address bar, so it stays out of the browser history and out of any Referer. See the main README, "Access Codes".
 
 ---
 
@@ -150,10 +142,10 @@ Section, where the guests can easaly get to rent a place to stay after the event
 ### RSVPForm.jsx
 **Flow:** access code → guest names → attendance → meal preferences → review → success. Names are collected *before* asking about attendance, so clicking "Regretfully decline" submits the RSVP immediately (with the names) and shows the "we will miss you" screen. The meal section is configured in wp-admin → Wedding → RSVP → Meal Options: a checkbox turns the dish choice off (fixed menu: only allergies/notes are asked), and the options list (one per line) replaces the translated defaults when filled. Allergens work the same way (Allergens box) and are always asked, as tick buttons plus a free-text "Not in the list? Tell us more" field. If a submission fails, an error is shown and the guest can retry instead of seeing a fake success screen.
 
-The RSVP form, this will be the one that will let you know who is comming (/or is not comming (soon<sup>TM</sup>)), for now it is a fixed form, meaning it's content and steps is hard coded, but you get the first and last name of each guest if they come with a +1 or more, they can let you know if they have a specific regime or food alergies, what kind of music they want. I'm looking into make this form configurable in the wp-admin wedding plugin. This form needs a code that can be passed in the URL `/?code=TEST123` for exemple, this code can be set in wp-admin -> settings tab RSVP, this is to avoid litle smart a** to spam or worst your wordpress, every RSVP is saved in wp-admin (RSVPs) and the hosts get one email per night with the new ones (recipients set in wp-admin -> Wedding -> Emails, with a "Send email now" button; needs SMTP: see the main README, "RSVP Digest Email").
+The RSVP form, this will be the one that will let you know who is comming (/or is not comming (soon<sup>TM</sup>)), for now it is a fixed form, meaning it's content and steps is hard coded, but you get the first and last name of each guest if they come with a +1 or more, they can let you know if they have a specific regime or food alergies, what kind of music they want. I'm looking into make this form configurable in the wp-admin wedding plugin. This form needs a code that can be passed in the URL `/?code=YOUR-CODE` for exemple, this code can be set in wp-admin -> settings tab RSVP, this is to avoid litle smart a** to spam or worst your wordpress, every RSVP is saved in wp-admin (RSVPs) and the hosts get one email per night with the new ones (recipients set in wp-admin -> Wedding -> Emails, with a "Send email now" button; needs SMTP: see the main README, "RSVP Digest Email").
 
 ## Accessibility
-Guests mostly answer on phones and some are older relatives, so the site follows WCAG 2.2 AA where the code allows it (audit with the `/a11y-check` skill):
+Guests mostly answer on phones and some are older relatives, so the site follows WCAG 2.2 AA where the code allows it:
 - **Form fields:** every field has a label (`aria-label` or `htmlFor`), required names use `aria-required`, the meal/allergen choices are `fieldset`/`legend` groups with `aria-pressed` buttons, each guest row is a group named "Invité N". Field borders (`gray-500`) and the focus ring (burgundy) are at least 3:1 on cream. The access code can be submitted with Enter.
 - **Step changes:** when the guest moves to another RSVP step, focus goes to that step's heading, so screen readers announce it (including the thank-you and declined screens). Not on page load, so a `?code=` link does not jump to the form.
 - **Phones:** in the guest step the age and remove controls sit under the names; the remove button is a 44px target.

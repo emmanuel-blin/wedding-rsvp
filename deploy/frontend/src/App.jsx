@@ -14,8 +14,21 @@ import './App.css';
 
 function App() {
     const rsvpRef = useRef(null);
-    // Access code from the invitation URL (?code=...)
-    const [accessCode] = useState(() => new URLSearchParams(window.location.search).get('code'));
+    // Access code from the invitation link (?code=...): kept for this visit, then removed from the address bar
+    const [accessCode] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        const urlCode = params.get('code');
+        try {
+            if (!urlCode) return sessionStorage.getItem('wedding-access-code');
+            sessionStorage.setItem('wedding-access-code', urlCode);
+            params.delete('code');
+            const query = params.toString();
+            window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash);
+        } catch {
+            // Storage or history blocked: the code stays in the URL
+        }
+        return urlCode;
+    });
     const { settings, stories, loading, error } = useWeddingData();
     const { t } = useTranslation();
 

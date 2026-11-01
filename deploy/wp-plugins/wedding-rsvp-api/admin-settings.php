@@ -52,6 +52,9 @@
     <h1>💒 Wedding Settings</h1>
 
     <?php settings_errors(); ?>
+    <?php if (!wedding_get_valid_codes()): ?>
+        <div class="notice notice-warning"><p>No access code is set yet, so guests cannot send their RSVP. Add at least one in the RSVP tab, under Access Codes.</p></div>
+    <?php endif; ?>
     <?php
     // Result of the "Send email now" button, shown once (see wedding_handle_send_digest)
     $notice_key = 'wedding_email_notice_' . get_current_user_id();
@@ -397,8 +400,8 @@
                 <tr>
                     <th><label for="wedding_access_codes">Valid Codes</label></th>
                     <td>
-                        <textarea id="wedding_access_codes" name="wedding_access_codes" rows="6" class="large-text" placeholder="LOVE2025&#10;WEDDING&#10;TEST123"><?= esc_textarea(get_option('wedding_access_codes', "LOVE2025\nWEDDING\nTEST123\nEMMA2025\nJohn2025")); ?></textarea>
-                        <p class="description">One code per line. Codes are case-insensitive.</p>
+                        <textarea id="wedding_access_codes" name="wedding_access_codes" rows="6" class="large-text" placeholder="One code per line"><?= esc_textarea(get_option('wedding_access_codes', '')); ?></textarea>
+                        <p class="description">One code per line, letters and numbers are not case-sensitive. Guests need one of these codes to send their RSVP, so use a long one (10 characters or more, for example A7K9Q2XM4PLR): the same code goes in the link of the QR code and on the printed invitation. Until at least one code is set, nobody can send an RSVP.</p>
                     </td>
                 </tr>
             </table>

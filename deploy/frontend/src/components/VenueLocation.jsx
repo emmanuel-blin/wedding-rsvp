@@ -51,7 +51,6 @@ export default function VenueLocation({
                 style={{ border: 0 }}
                 allowFullScreen=""
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
                 title={t('location.map_of', { place: title })}
             ></iframe>
             </div>

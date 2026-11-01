@@ -20,8 +20,9 @@ function wedding_register_rsvp_post_type() {
         'show_ui' => true,
         'show_in_menu' => true,
         'menu_icon' => 'dashicons-heart',
-        'supports' => ['title', 'custom-fields'],
-        'capability_type' => 'post',
+        'supports' => ['title'],
+        'capability_type' => ['wedding_rsvp', 'wedding_rsvps'],
+        'map_meta_cap' => true,
     ]);
 }
 
@@ -54,10 +55,10 @@ add_action('manage_wedding_rsvp_posts_custom_column', function($column, $post_id
                 : '<span style="color: red;">✗ Declined</span>';
             break;
         case 'guest_count':
-            echo get_post_meta($post_id, 'guest_count', true) ?: '-';
+            echo esc_html(get_post_meta($post_id, 'guest_count', true)) ?: '-';
             break;
         case 'meal':
-            echo get_post_meta($post_id, 'meal_preference', true) ?: '-';
+            echo esc_html(get_post_meta($post_id, 'meal_preference', true)) ?: '-';
             break;
         case 'allergens':
             $allergens = get_post_meta($post_id, 'allergens', true);
