@@ -6,7 +6,7 @@
  * Description: Add RSVP functionality to wordpress REST API
  * Requires at least: 5.0
  * Requires PHP: 5.6
- * Version: 1.3.0
+ * Version: 1.4.0
  * Update URI: false
  * Author: E.Blin
  * Author URI: https://b-link.xyz

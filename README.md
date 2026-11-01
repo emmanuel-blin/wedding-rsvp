@@ -480,6 +480,9 @@ docker compose up -d --force-recreate frontend wordpress
 
 ## Plugin Changelog
 
+### 1.4.0
+- **Color themes**: 6 palettes picked in Wedding → Settings → General → Colors (round buttons: main color + accent border), stored in the `wedding_theme` option (unknown values fall back to `classic`), returned as `theme` by `GET /settings` and applied by the frontend as CSS variables. Classic Bordeaux keeps the original colors with a deeper secondary color for contrast. The site no longer puts white text on the accent or accent-colored text on light backgrounds: accent buttons and Timeline icons use the main color, selected options and hovers use the secondary color, and the main buttons and Timeline times use the palette's light text color instead of plain white, so every palette reaches 4.5:1.
+
 ### 1.3.0
 - **Access codes**: no built-in default codes any more (the gate stays closed until a code is set, with a notice on the settings page); strict comparison; wrong codes are counted per visitor (20 per 15 minutes, `429` afterwards) on `/validate-code` and `/rsvp`; the visitor address comes from `CF-Connecting-IP` when the request arrives from a private address (tunnel/proxy).
 - **RSVP limits**: at most 20 guests (`400` beyond), names 80 characters, dietary notes 1000, song request 200, 10 meal/allergen items of 80 characters. Same code + same guest names = the new answer replaces the previous one (`updated_at` meta, flagged "Updated answer" in the next digest) instead of a duplicate.
@@ -488,9 +491,6 @@ docker compose up -d --force-recreate frontend wordpress
 - **Headless hardening**: XML-RPC answers `403`, sitemaps and the public user list (`/wp/v2/users`, `?author=`) are off for visitors who are not logged in, "Lost your password?" is limited to 3 requests per hour per visitor and per account. `wordpress-setup.sh` also closes comments and pings, removes the sample post/page, deactivates WPGraphQL when the flag is off, refuses `CHANGE_ME` admin passwords on the first install and warns if the admin user is missing. The plugin, the themes and the generated headless theme declare `Update URI: false` (no WordPress.org update offers for their names).
 - **Frontend**: the Google Maps iframes no longer send the full page URL (and the invite code) as Referer; the invite code is read from the QR link, kept in `sessionStorage` and removed from the address bar.
 - **Deployment**: install guard (must-use plugin) against a web install before the setup script ran, working WordPress healthcheck, `BIND_ADDR` for the published ports.
-
-### 1.3.0
-- **Color themes**: 6 palettes picked in Wedding → Settings → General → Colors (round buttons: main color + accent border), stored in the `wedding_theme` option (unknown values fall back to `classic`), returned as `theme` by `GET /settings` and applied by the frontend as CSS variables. Classic Bordeaux keeps the original colors with a deeper secondary color for contrast. The site no longer puts white text on the accent or accent-colored text on light backgrounds: accent buttons and Timeline icons use the main color, selected options and hovers use the secondary color, so every palette reaches 4.5:1.
 
 ### 1.2.1
 - **Nightly digest email** for the hosts replaces the email sent on each RSVP (none was actually sent before: the WordPress image has no sendmail). New RSVPs are saved with `notified=0`, the WP-Cron event `wedding_rsvp_digest` emails them once a night at `WEDDING_DIGEST_HOUR` and flips them to `1` only if sending worked. The event is rescheduled by itself when the hour, the timezone or DST changes, and cleared when the plugin is deactivated. `wordpress-entrypoint.sh` now triggers WP-Cron every 5 minutes from inside the WordPress container, so it doesn't depend on site visits (no extra service). A lock (`wedding_digest_lock` option, taken over after 10 minutes) prevents the nightly run and the button from sending the same RSVPs twice.

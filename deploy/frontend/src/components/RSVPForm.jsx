@@ -253,7 +253,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <button
                     type="submit"
                     disabled={isLoading || !formData.accessCode}
-                    className="mt-6 px-8 py-3 bg-primary text-white uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="mt-6 px-8 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isLoading ? t('rsvp.verification') : t('rsvp.continue')}
                 </button>
@@ -363,7 +363,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="flex justify-end">
                     <button
                     onClick={continueToAttendance}
-                    className="px-8 py-3 bg-primary text-white uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
+                    className="px-8 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
                     </button>
@@ -430,7 +430,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     </button>
                     <button
                     onClick={() => goToStep(STEPS.REVIEW)}
-                    className="px-8 py-3 bg-primary text-white uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
+                    className="px-8 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
                     </button>

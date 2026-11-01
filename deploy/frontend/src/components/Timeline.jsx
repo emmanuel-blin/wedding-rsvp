@@ -83,7 +83,7 @@ export default function Timeline({ timeline }) {
                     }`}
                 >
                     <div className={`w-1/2 ${index % 2 === 0 ? 'text-right pr-8 md:pr-12' : 'text-left pl-8 md:pl-12'}`}>
-                    <span className="inline-block px-3 py-1 md:px-4 md:py-2 bg-primary text-white font-serif text-lg md:text-xl rounded-sm">
+                    <span className="inline-block px-3 py-1 md:px-4 md:py-2 bg-primary text-on-primary font-serif text-lg md:text-xl rounded-sm">
                         {event.time}
                     </span>
                     </div>
