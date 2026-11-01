@@ -49,8 +49,8 @@ chmod +x deploy.sh debug.sh wordpress-entrypoint.sh wordpress-setup.sh
 # Copy environment template
 cp .env.example .env
 
-# Edit .env and replace every CHANGE_ME value (passwords are required:
-# docker compose refuses to start without WORDPRESS_ADMIN_PASSWORD)
+# Edit .env and replace every CHANGE_ME value (WORDPRESS_ADMIN_PASSWORD is required, and the
+# first install refuses the CHANGE_ME placeholder)
 nano .env
 ```
 
@@ -71,7 +71,7 @@ The script will:
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| **Wedding Site** | http://localhost:5173?code=TEST123 | - |
+| **Wedding Site** | http://localhost:5173?code=YOUR-CODE | - |
 | **WordPress Admin** | http://localhost:8080/wp-admin | `WORDPRESS_ADMIN_USER` / `WORDPRESS_ADMIN_PASSWORD` from `.env` |
 | **WordPress GraphQL** | http://localhost:8080/graphql | - | Optional* |
 | **Wedding API** | http://localhost:8080/wp-json/wedding/v1/ | - |
@@ -155,13 +155,14 @@ Edit `deploy/.env` to customize:
 | `MYSQL_ROOT_PASSWORD` | *(none, required)* | MySQL root password |
 | `MYSQL_PASSWORD` | *(none, required)* | MySQL password for the WordPress user |
 | `WORDPRESS_ADMIN_USER` | admin | WP admin username |
-| `WORDPRESS_ADMIN_PASSWORD` | *(none, required)* | WP admin password |
+| `WORDPRESS_ADMIN_PASSWORD` | *(none, required)* | WP admin password, **only used at the first install** (the first install refuses `CHANGE_ME` values). Changing it here later does nothing: see [Rotating passwords](#rotating-passwords) |
 | `WORDPRESS_SITE_TITLE` | Headless WordPress | Site title |
 | `HOST_URL` | localhost | Public hostname of the **frontend** (no scheme, no port). Added to Vite's `server.allowedHosts` |
 | `WP_HOME` / `WP_SITEURL` | http://localhost:8080 | Public URL of **WordPress** |
 | `VITE_API_BASE` | http://localhost:8080/wp-json/wedding/v1 | Wedding API URL, as seen from the **browser** |
 | `WORDPRESS_CORS_ORIGINS` | http://localhost:5173 | Allowed CORS origins (the frontend's public origin, no port/path unless needed) |
-| `WORDPRESS_ENABLE_GRAPHQL` | false | Enable WPGraphQL plugin |
+| `WORDPRESS_ENABLE_GRAPHQL` | false | Enable WPGraphQL plugin (setting it back to `false` deactivates the plugin at the next start) |
+| `BIND_ADDR` | 0.0.0.0 | Address the frontend (5173) and WordPress (8080) ports listen on. Use `127.0.0.1` when your reverse proxy or tunnel runs on the same host |
 | `WORDPRESS_ADMIN_EMAIL` | admin@example.com | WP admin email, **only used at the first install** (later: WP Admin → Settings → General). Receives the RSVP digest when no recipient is set in Wedding → Emails |
 | `WEDDING_DIGEST_HOUR` | 2 | Hour (0-23) of the nightly RSVP digest, in the WordPress timezone (Settings → General, UTC by default) |
 | `WEDDING_SMTP_HOST` | *(empty)* | SMTP server. **Required to send any email**: the WordPress image has no sendmail |
@@ -169,6 +170,20 @@ Edit `deploy/.env` to customize:
 | `WEDDING_SMTP_SECURE` | tls | `tls` (587), `ssl` (465) or `none` |
 | `WEDDING_SMTP_USER` / `WEDDING_SMTP_PASS` | *(empty)* | SMTP login (e.g. a Gmail address + an app password) |
 | `WEDDING_SMTP_FROM` | `WEDDING_SMTP_USER` | Sender address (most providers only accept a verified one) |
+
+### Rotating passwords
+
+`WORDPRESS_ADMIN_PASSWORD` and the `MYSQL_*` passwords are only applied the first time the stack is created (WordPress install, empty database volume). Editing `.env` afterwards changes nothing in the running site. To rotate them:
+
+```bash
+# WordPress admin: wp-admin -> Users, or
+docker exec wordpress_backend wp user update <user> --user_pass='a-new-long-password' --allow-root
+
+# MySQL: change the user's password inside the db container, then update MYSQL_PASSWORD in .env
+# and recreate the containers (ALTER USER 'wordpress'@'%' IDENTIFIED BY '...';)
+```
+
+Older revisions of this repository shipped example passwords (`admin123`, ...) that remain in the git history: if a site was ever installed with them, rotate them.
 
 > `VITE_API_BASE` is read when the frontend container starts. After changing it (or any `.env` value), recreate the container: `docker compose up -d --force-recreate frontend`. A plain restart does not pick up new env vars.
 
@@ -189,13 +204,14 @@ All endpoints under `/wp-json/wedding/v1/`:
 
 ## Access Codes
 
-Manage in WordPress Admin → Wedding Settings:
+Manage in WordPress Admin → Wedding → RSVP → **Access Codes** (one per line, not case-sensitive).
 
-| Code | Purpose |
-|------|---------|
-| `TEST123` | Testing |
-| `LOVE2025` | Guest invite |
-| `WEDDING` | Guest invite |
+- There is **no built-in code**: until you add one, nobody can send an RSVP (the settings page tells you).
+- Use a long random code, 10 characters or more (e.g. `A7K9Q2XM4PLR`), and put the **same code** on the printed invitation and in the link of its QR code (`https://your-site/?code=A7K9Q2XM4PLR`). Guests who scan the QR code never type anything; guests who type it can use any capitalisation.
+- The page removes `?code=` from the address bar after reading it (kept for the visit only), so it does not stay in the browser history or in a shared screenshot.
+- A visitor who sends 20 wrong codes within 15 minutes is blocked for a while (right codes are never counted, other visitors are not affected). Behind a tunnel or proxy on a private address, the visitor address comes from the `CF-Connecting-IP` header.
+- One code is shared by all guests: anyone holding it could answer in another guest's name. A resubmission with the same code and the same guest names replaces the previous answer (no double counting). A code per invitation is on the backlog.
+- An RSVP accepts at most 20 guests, names up to 80 characters, dietary notes up to 1000 and a song request up to 200.
 
 ---
 
@@ -435,14 +451,24 @@ docker compose up -d --force-recreate frontend wordpress
 1. **Replace all `CHANGE_ME` passwords** in `.env` (the WordPress admin is publicly reachable)
 2. **Use HTTPS** - Configure SSL certificates (or terminate TLS at the tunnel/proxy)
 3. **Backups** - Regularly backup the volumes: `docker volume ls | grep test2`
-4. **Ports** - Only the frontend (`5173`) and WordPress (`8080`) should be reachable; MySQL is not published and phpMyAdmin is bound to `127.0.0.1`. Stop phpMyAdmin when you are done with it
-5. **Networks** - `db`, `wordpress` and `phpmyadmin` share `backend_net`; the frontend is alone on `frontend_net`, so it cannot reach MySQL
-6. **Resource limits** - Memory is capped per container in `docker-compose.yml` (db 512M, wordpress 512M, frontend 512M, phpmyadmin 128M) so one runaway container cannot freeze the host. Raise them if a container gets OOM-killed (`docker inspect <name> --format '{{.State.OOMKilled}}'`)
-7. **GraphQL** - Only enable if you need it
-8. **Frontend** - The stack runs the Vite dev server (with polling for the bind mount). That is fine for a short-lived, invite-only site; serve a static build instead if it becomes long-lived
-9. **Email** - Set `WEDDING_SMTP_*` and the digest recipients (Wedding → Emails), otherwise the hosts get no RSVP email at all. Send a test digest before the invitations go out (see [RSVP Digest Email](#rsvp-digest-email))
+4. **Ports** - Only the frontend (`5173`) and WordPress (`8080`) should be reachable, and only from your reverse proxy or tunnel: set `BIND_ADDR=127.0.0.1` when it runs on the same host, otherwise restrict these two ports to the proxy's address with a firewall (ports published by Docker bypass host firewalls such as ufw). MySQL is not published and phpMyAdmin is bound to `127.0.0.1`. Stop phpMyAdmin when you are done with it. Rate limits on `/wp-login.php` and `/wp-json/wedding/v1/*` at your proxy are a good addition
+5. **First install** - WordPress is installed by `wordpress-setup.sh`; until it has run, a small must-use plugin (`deploy/wp-mu-plugins/wedding-install-guard.php`) answers 503 to every web request, so nobody can claim the site through WordPress's web installer
+6. **Networks** - `db`, `wordpress` and `phpmyadmin` share `backend_net`; the frontend is alone on `frontend_net`, so it cannot reach MySQL
+7. **Resource limits** - Memory is capped per container in `docker-compose.yml` (db 512M, wordpress 512M, frontend 512M, phpmyadmin 128M) so one runaway container cannot freeze the host. Raise them if a container gets OOM-killed (`docker inspect <name> --format '{{.State.OOMKilled}}'`)
+8. **GraphQL** - Only enable if you need it
+9. **Frontend** - The stack runs the Vite dev server (with polling for the bind mount). That is fine for a short-lived, invite-only site; serve a static build instead if it becomes long-lived
+10. **Email** - Set `WEDDING_SMTP_*` and the digest recipients (Wedding → Emails), otherwise the hosts get no RSVP email at all. Send a test digest before the invitations go out (see [RSVP Digest Email](#rsvp-digest-email))
 
 ## Plugin Changelog
+
+### 1.3.0
+- **Access codes**: no built-in default codes any more (the gate stays closed until a code is set, with a notice on the settings page); strict comparison; wrong codes are counted per visitor (20 per 15 minutes, `429` afterwards) on `/validate-code` and `/rsvp`; the visitor address comes from `CF-Connecting-IP` when the request arrives from a private address (tunnel/proxy).
+- **RSVP limits**: at most 20 guests (`400` beyond), names 80 characters, dietary notes 1000, song request 200, 10 meal/allergen items of 80 characters. Same code + same guest names = the new answer replaces the previous one (`updated_at` meta, flagged "Updated answer" in the next digest) instead of a duplicate.
+- **Permissions**: RSVPs and stories have their own capabilities and are no longer open to Contributors, Authors and Editors; the Wedding settings, the RSVP list and "Send email now" use `manage_wedding`. New **Wedding host** role (RSVPs, stories, Wedding settings, no other WordPress administration) and the capabilities are given to administrators too (synced once, `wedding_caps_version` option). The raw custom fields box is removed from RSVPs and the list columns are escaped.
+- **Digest**: at most 100 RSVPs per email (a follow-up email is scheduled 5 minutes later when more are waiting), totals computed with SQL, multi-line dietary notes indented so they cannot pass for another entry.
+- **Headless hardening**: XML-RPC answers `403`, sitemaps and the public user list (`/wp/v2/users`, `?author=`) are off for visitors who are not logged in, "Lost your password?" is limited to 3 requests per hour per visitor and per account. `wordpress-setup.sh` also closes comments and pings, removes the sample post/page, deactivates WPGraphQL when the flag is off, refuses `CHANGE_ME` admin passwords on the first install and warns if the admin user is missing. The plugin, the themes and the generated headless theme declare `Update URI: false` (no WordPress.org update offers for their names).
+- **Frontend**: the Google Maps iframes no longer send the full page URL (and the invite code) as Referer; the invite code is read from the QR link, kept in `sessionStorage` and removed from the address bar.
+- **Deployment**: install guard (must-use plugin) against a web install before the setup script ran, working WordPress healthcheck, `BIND_ADDR` for the published ports.
 
 ### 1.2.1
 - **Nightly digest email** for the hosts replaces the email sent on each RSVP (none was actually sent before: the WordPress image has no sendmail). New RSVPs are saved with `notified=0`, the WP-Cron event `wedding_rsvp_digest` emails them once a night at `WEDDING_DIGEST_HOUR` and flips them to `1` only if sending worked. The event is rescheduled by itself when the hour, the timezone or DST changes, and cleared when the plugin is deactivated. `wordpress-entrypoint.sh` now triggers WP-Cron every 5 minutes from inside the WordPress container, so it doesn't depend on site visits (no extra service). A lock (`wedding_digest_lock` option, taken over after 10 minutes) prevents the nightly run and the button from sending the same RSVPs twice.

@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:80"
+      - "${BIND_ADDR:-0.0.0.0}:8080:80"
     environment:
       WORDPRESS_DB_HOST: ${DB_HOST:-db}:3306
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
@@ -65,6 +65,8 @@ services:
       # Wedding RSVP plugin and theme
       - ./wp-plugins/wedding-rsvp-api:/var/www/html/wp-content/plugins/wedding-rsvp-api:ro
       - ./wp-themes/weddingrsvpblank:/var/www/html/wp-content/themes/weddingrsvpblank:ro
+      # Refuses web requests until the setup script has installed WordPress
+      - ./wp-mu-plugins:/var/www/html/wp-content/mu-plugins:ro
     entrypoint: ["/usr/local/bin/wordpress-entrypoint.sh"]
     networks:
       - backend_net
@@ -73,8 +75,8 @@ services:
         limits:
           memory: 512M
     healthcheck:
-      # Check if WordPress root responds (setup may not have run yet)
-      test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php", "||", "curl", "-f", "http://localhost:80/wp-json/wp/v2/"]
+      # Healthy once WordPress is installed and answers the REST API (the install guard returns 503 before)
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null 'http://localhost:80/?rest_route=/' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -89,7 +91,7 @@ services:
     depends_on:
       - wordpress
     ports:
-      - "5173:5173"
+      - "${BIND_ADDR:-0.0.0.0}:5173:5173"
     environment:
       - VITE_API_BASE=${VITE_API_BASE:-http://localhost:8080/wp-json/wedding/v1}
       - VITE_WP_GRAPHQL_URL=${VITE_WP_GRAPHQL_URL:-http://localhost:8080/graphql}

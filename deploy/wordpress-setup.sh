@@ -37,6 +37,12 @@ if ! wp core is-installed --allow-root 2>/dev/null; then
     # Using environment variables or defaults
     WP_ADMIN_USER=${WORDPRESS_ADMIN_USER:-admin}
     WP_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD:?WORDPRESS_ADMIN_PASSWORD is not set}
+    case "$WP_ADMIN_PASSWORD" in
+        CHANGE_ME*)
+            echo "ERROR: WORDPRESS_ADMIN_PASSWORD still has the CHANGE_ME placeholder. Set a real password in .env." >&2
+            exit 1
+            ;;
+    esac
     WP_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
     WP_SITE_TITLE=${WORDPRESS_SITE_TITLE:-Headless WordPress}
 
@@ -79,6 +85,11 @@ else
     fi
 
     echo "URL check complete."
+
+    # The admin password in .env is only applied at the first install (see README)
+    if ! wp user get "${WORDPRESS_ADMIN_USER:-admin}" --field=roles --allow-root 2>/dev/null | grep -q administrator; then
+        echo "WARNING: '${WORDPRESS_ADMIN_USER:-admin}' is not an administrator of this site. Check wp-admin -> Users."
+    fi
 fi
 
 # Optionally install WPGraphQL plugin (disabled by default)
@@ -88,8 +99,22 @@ if [ "$ENABLE_GRAPHQL" = "true" ]; then
     wp plugin install wp-graphql --activate --allow-root 2>/dev/null || true
     echo "GraphQL enabled at: ${DESIRED_URL:-http://localhost:8080}/graphql"
 else
+    if wp plugin is-active wp-graphql --allow-root 2>/dev/null; then
+        wp plugin deactivate wp-graphql --allow-root
+        echo "GraphQL plugin deactivated (WORDPRESS_ENABLE_GRAPHQL is not true)"
+    fi
     echo "GraphQL plugin skipped (enable with WORDPRESS_ENABLE_GRAPHQL=true)"
 fi
+
+# No comments, trackbacks or sample content on a headless site (nothing displays them)
+wp option update default_comment_status closed --allow-root
+wp option update default_ping_status closed --allow-root
+for slug in hello-world sample-page; do
+    sample_ids=$(wp post list --post_type=post,page --name="$slug" --format=ids --allow-root 2>/dev/null || true)
+    if [ -n "$sample_ids" ]; then
+        wp post delete $sample_ids --force --allow-root
+    fi
+done
 
 # ============================================
 # WEDDING RSVP PLUGIN & THEME
@@ -133,6 +158,7 @@ cat > /var/www/html/wp-content/themes/headless-theme/style.css << 'EOF'
 Theme Name: Headless Theme
 Description: Minimal theme for headless WordPress
 Version: 1.0
+Update URI: false
 */
 EOF
 
