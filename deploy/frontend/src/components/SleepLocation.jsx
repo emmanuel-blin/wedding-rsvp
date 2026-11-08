@@ -29,26 +29,27 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
     const sleepLocation = apiSleepLocation || {};
 
     const subtitle = sleepLocation.subtitle || t('defaults.sleep_subtitle');
+    const title = sleepLocation.title || t('defaults.sleep_title');
     const description = sleepLocation.description || t('defaults.sleep_description');
-    const venueName = sleepLocation.venueName || t('defaults.sleep_venue_name');
+    const searchArea = sleepLocation.searchArea || t('defaults.sleep_venue_name');
 
     return (
         <section>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-            <h3 className="font-sans text-secondary tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</h3>
+            <p className="text-secondary tracking-[0.3em] uppercase text-sm mb-2">{subtitle}</p>
+            <h3 className="font-serif text-2xl md:text-3xl text-primary">{title}</h3>
             <div className="mt-4 w-24 h-px bg-accent mx-auto"></div>
             </div>
             <div className="text-center mb-12 max-w-2xl mx-auto">
-            <p className="text-gray-600 text-lg leading-relaxed">{description}</p>
-            <p className="text-primary font-medium mt-4">{venueName}</p>
+            <p className="text-gray-600 text-lg leading-relaxed whitespace-pre-line">{description}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {BOOKING_SERVICES.map((service) => (
                 <a
                 key={service.name}
-                href={service.getUrl(venueName)}
+                href={service.getUrl(searchArea)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-4 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-secondary bg-surface hover:bg-white active:bg-white"
@@ -58,7 +59,7 @@ export default function SleepLocation({ sleepLocation: apiSleepLocation }) {
                 </div>
                 <div className="flex-1">
                     <h4 className="font-serif text-xl text-primary group-hover:text-secondary transition-colors duration-300">{service.name}</h4>
-                    <p className="text-sm text-gray-500">{t('defaults.sleep_search_near', { venueName })}</p>
+                    <p className="text-sm text-gray-500">{t('defaults.sleep_search_near', { venueName: searchArea })}</p>
                 </div>
                 <svg
                     aria-hidden="true"

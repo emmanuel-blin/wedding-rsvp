@@ -80,6 +80,14 @@ function wedding_register_settings() {
 
     register_setting('wedding_settings', 'wedding_our_story_subtitle');
     register_setting('wedding_settings', 'wedding_our_story_title');
+    register_setting('wedding_settings', 'wedding_show_our_story');
+
+    register_setting('wedding_settings', 'wedding_sleep_subtitle');
+    register_setting('wedding_settings', 'wedding_sleep_title');
+    register_setting('wedding_settings', 'wedding_sleep_description', [
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ]);
+    register_setting('wedding_settings', 'wedding_sleep_search_area');
 
     register_setting('wedding_settings', 'wedding_location_subtitle');
     register_setting('wedding_settings', 'wedding_location_title');

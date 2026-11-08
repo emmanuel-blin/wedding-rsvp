@@ -342,6 +342,17 @@
             </div>
             <table class="form-table">
                 <tr>
+                    <th><label for="wedding_show_our_story">Show this section</label></th>
+                    <td>
+                        <input type="hidden" name="wedding_show_our_story" value="0">
+                        <label>
+                            <input type="checkbox" id="wedding_show_our_story" name="wedding_show_our_story" value="1" <?= get_option('wedding_show_our_story', '1') === '1' ? 'checked' : ''; ?>>
+                            Show the "Our Story" section on the site
+                        </label>
+                        <p class="description">Untick to hide the section and its stories. Your stories are kept and come back when you tick it again.</p>
+                    </td>
+                </tr>
+                <tr>
                     <th><label for="wedding_our_story_subtitle">Subtitle</label></th>
                     <td><input type="text" id="wedding_our_story_subtitle" name="wedding_our_story_subtitle" value="<?= esc_attr(get_option('wedding_our_story_subtitle', 'The highlights')); ?>" class="regular-text"></td>
                 </tr>
@@ -373,7 +384,7 @@
             <table class="form-table">
                 <tr>
                     <th><label for="wedding_sleep_subtitle">Subtitle</label></th>
-                    <td><input type="text" id="wedding_sleep_subtitle" name="wedding_sleep_subtitle" value="<?= esc_attr(get_option('wedding_sleep_subtitle', 'Need a Place to Stay')); ?>" class="regular-text"></td>
+                    <td><input type="text" id="wedding_sleep_subtitle" name="wedding_sleep_subtitle" value="<?= esc_attr(get_option('wedding_sleep_subtitle', 'Need a Place to Stay?')); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
                     <th><label for="wedding_sleep_title">Title</label></th>
@@ -382,8 +393,15 @@
                 <tr>
                     <th><label for="wedding_sleep_description">Description</label></th>
                     <td>
-                        <textarea id="wedding_sleep_description" name="wedding_sleep_description" rows="4" class="large-text"><?= esc_textarea(get_option('wedding_sleep_description', "Looking for a place to stay? We've partnered with local accommodations to make your visit comfortable. Book your stay near the venue using the links below.")); ?></textarea>
-                        <p class="description">This text will appear above the booking links. The venue name is used to pre-filter search results.</p>
+                        <textarea id="wedding_sleep_description" name="wedding_sleep_description" rows="4" class="large-text"><?= esc_textarea(get_option('wedding_sleep_description', 'Looking for a place to stay? Book your stay near the venue using the links below.')); ?></textarea>
+                        <p class="description">This text appears above the Airbnb and Booking.com links.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="wedding_sleep_search_area">Search near</label></th>
+                    <td>
+                        <input type="text" id="wedding_sleep_search_area" name="wedding_sleep_search_area" value="<?= esc_attr(get_option('wedding_sleep_search_area', '')); ?>" class="regular-text" placeholder="<?= esc_attr(get_option('wedding_venue_name', 'The venue name')); ?>">
+                        <p class="description">Place used for the Airbnb and Booking.com searches, e.g. the town of the venue. Leave empty to use the venue name.</p>
                     </td>
                 </tr>
             </table>
