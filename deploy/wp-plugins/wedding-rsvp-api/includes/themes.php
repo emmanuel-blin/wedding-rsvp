@@ -30,6 +30,10 @@ function wedding_theme_palettes() {
             'name' => 'Dusty Blue',
             'colors' => ['primary' => '#36506a', 'onPrimary' => '#e3ebf2', 'accent' => '#e6c3b5', 'secondary' => '#97564c', 'surface' => '#f7f9fb'],
         ],
+        'olive_peach' => [
+            'name' => 'Olive Peach',
+            'colors' => ['primary' => '#454f20', 'onPrimary' => '#fbe0cc', 'accent' => '#f6b195', 'secondary' => '#f6b195', 'surface' => '#fff8ee'],
+        ],
     ];
 }
 

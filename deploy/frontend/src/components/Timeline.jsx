@@ -46,7 +46,10 @@ export default function Timeline({ timeline }) {
         location: displayTimelineDinnerShortname,
         icon: (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <g strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+                <path transform="translate(6 0) rotate(12 0 21)" d="M-2 2h4l-.5 8a1.5 1.5 0 0 1-3 0ZM0 11.5V21M-2.5 21h5" />
+                <path transform="translate(18 0) rotate(-12 0 21)" d="M-2 2h4l-.5 8a1.5 1.5 0 0 1-3 0ZM0 11.5V21M-2.5 21h5" />
+            </g>
             </svg>
         ),
         },
@@ -75,29 +78,30 @@ export default function Timeline({ timeline }) {
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-accent/30 transform -translate-x-1/2"></div>
 
             <div className="space-y-12">
-                {events.map((event, index) => (
+                {events.map((event, index) => {
+                const timeLeft = index % 2 === 0;
+                return (
                 <div
-                    key={event.time}
-                    className={`relative flex items-center ${
-                    index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
-                    }`}
+                    key={index}
+                    className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-4 md:gap-x-12"
                 >
-                    <div className={`w-1/2 ${index % 2 === 0 ? 'text-right pr-8 md:pr-12' : 'text-left pl-8 md:pl-12'}`}>
+                    <div className={`row-start-1 ${timeLeft ? 'col-start-1 text-right' : 'col-start-3 text-left'}`}>
                     <span className="inline-block px-3 py-1 md:px-4 md:py-2 bg-primary text-on-primary font-serif text-lg md:text-xl rounded-sm">
                         {event.time}
                     </span>
                     </div>
 
-                    <div aria-hidden="true" className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 md:w-12 md:h-12 bg-accent rounded-full flex items-center justify-center text-primary z-10 shadow-lg">
+                    <div aria-hidden="true" className="row-start-1 col-start-2 w-10 h-10 md:w-12 md:h-12 bg-accent rounded-full flex items-center justify-center text-primary z-10">
                     {event.icon}
                     </div>
 
-                    <div className={`${index % 2 === 0 ? 'pl-8 md:pl-12' : 'pr-8 md:pr-12'}`}>
+                    <div className={`row-start-1 break-words ${timeLeft ? 'col-start-3 text-left' : 'col-start-1 text-right'}`}>
                     <h3 className="font-serif text-lg md:text-2xl text-primary mb-1 leading-tight">{event.title}</h3>
                     <p className="text-gray-500 text-sm md:text-base">{event.location}</p>
                     </div>
                 </div>
-                ))}
+                );
+                })}
             </div>
             </div>
         </div>

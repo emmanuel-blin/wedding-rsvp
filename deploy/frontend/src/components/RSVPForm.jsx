@@ -284,7 +284,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                     <button
                     onClick={() => goToStep(STEPS.GUESTS)}
                     disabled={isLoading}
-                    className="px-6 py-3 text-gray-500 hover:text-primary transition-colors"
+                    className="py-3 text-gray-500 hover:text-primary transition-colors"
                     >
                     ← {t('common.back')}
                     </button>
@@ -363,7 +363,7 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="flex justify-end">
                     <button
                     onClick={continueToAttendance}
-                    className="px-8 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
+                    className="px-6 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
                     </button>
@@ -424,13 +424,13 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="flex justify-between">
                     <button
                     onClick={() => goToStep(STEPS.ATTENDANCE)}
-                    className="px-6 py-3 text-gray-500 hover:text-primary transition-colors"
+                    className="py-3 text-gray-500 hover:text-primary transition-colors"
                     >
                     ← {t('common.back')}
                     </button>
                     <button
                     onClick={() => goToStep(STEPS.REVIEW)}
-                    className="px-8 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
+                    className="px-6 py-3 bg-primary text-on-primary uppercase tracking-wider hover:bg-primary/90 transition-colors rounded-sm"
                     >
                     {t('rsvp.continue')}
                     </button>
@@ -478,14 +478,14 @@ export default function RSVPForm({ accessCode: initialCode, formHead }) {
                 <div className="flex justify-between">
                     <button
                     onClick={() => goToStep(STEPS.PREFERENCES)}
-                    className="px-6 py-3 text-gray-500 hover:text-primary transition-colors"
+                    className="py-3 text-gray-500 hover:text-primary transition-colors"
                     >
                     ← {t('rsvp.edit')}
                     </button>
                     <button
                     onClick={() => submitRSVP()}
                     disabled={isLoading}
-                    className="px-8 py-3 bg-accent text-primary uppercase tracking-wider hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+                    className="px-6 py-3 bg-accent text-primary uppercase tracking-wider hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                     >
                     {isLoading ? t('rsvp.submitting') : t('rsvp.submit')}
                     </button>

@@ -55,38 +55,38 @@ function calculateTimeLeft(weddingDate) {
 
         {/* Content */}
         <div className="relative text-center text-white px-4">
-            <p className="text-on-primary tracking-[0.3em] uppercase text-sm md:text-base mb-4">
+            <p className="text-on-primary tracking-[0.3em] text-sm md:text-base mb-4">
             {displayHeroSubtitle}
             </p>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-2 tracking-wide">
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-6 tracking-wide">
             {displayNames[0]} & {displayNames[1]}
             </h1>
-            <p className="text-on-primary tracking-[0.2em] uppercase text-lg md:text-xl mb-4">
+            <p className="text-on-primary tracking-[0.2em] text-sm md:text-xl mb-4">
             {displayHeroTitle}
             </p>
-            <p className="text-on-primary tracking-[0.2em] uppercase text-xl md:text-2xl mb-8">
+            <p className="text-on-primary tracking-[0.2em] text-xl md:text-2xl mb-8">
             {formattedDate}
             </p>
 
             <div className="flex justify-center gap-2 md:gap-8 mb-12">
             <div className="text-center">
                 <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.days}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_days')}</div>
+                <div className="text-xs md:text-sm tracking-widest text-on-primary/80">{t('hero.countdown_days')}</div>
             </div>
             <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
                 <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.hours}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_hours')}</div>
+                <div className="text-xs md:text-sm tracking-widest text-on-primary/80">{t('hero.countdown_hours')}</div>
             </div>
             <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
                 <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.minutes}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_minutes')}</div>
+                <div className="text-xs md:text-sm tracking-widest text-on-primary/80">{t('hero.countdown_minutes')}</div>
             </div>
             <div className="text-3xl md:text-5xl font-light text-accent/60">:</div>
             <div className="text-center">
                 <div className="text-4xl md:text-6xl font-serif text-accent">{timeLeft.seconds}</div>
-                <div className="text-xs md:text-sm uppercase tracking-widest text-on-primary/80">{t('hero.countdown_seconds')}</div>
+                <div className="text-xs md:text-sm tracking-widest text-on-primary/80">{t('hero.countdown_seconds')}</div>
             </div>
             </div>
 
