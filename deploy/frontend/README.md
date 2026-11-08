@@ -139,7 +139,7 @@ This starts: MySQL, WordPress, and React frontend containers.
 Hero zone, contains a background image that can be customized in wp-admin Wedding -> settings general tab, so your guests will know who you are
 
 ### OurStory.jsx
-Story telling section, can be customized in wp-admin Wedding -> settings -> all stories, those are post type, like a normal wordpress post, they can have thumbnails, titles and texts. Tell your story get crative.
+Story telling section, can be customized in wp-admin Wedding -> settings -> all stories, those are post type, like a normal wordpress post, they can have thumbnails, titles and texts. Tell your story get crative. The whole section can be hidden with the "Show this section" checkbox in Wedding → Settings → Content (`ourStory.enabled`); the stories are kept.
 
 ### Timeline.jsx
 Timeline section, can be customized in the wp-admin wedding -> settings Timeline tab, this will let you set how you planned the event. we all know it won't go as you planned it but at list it is there
@@ -151,7 +151,7 @@ Google map frame with the address of the city hall and venue location, some indi
 just to load both previous components.
 
 ### SleepLocation.jsx
-Section, where the guests can easaly get to rent a place to stay after the event, even thought we all hope the guests should not take the road after having too much wine and dancing
+Section, where the guests can easaly get to rent a place to stay after the event, even thought we all hope the guests should not take the road after having too much wine and dancing. Subtitle, title, description and the "Search near" place (e.g. the town, empty = venue name) used for the Airbnb/Booking.com searches are set in Wedding → Settings → Content → Accommodation (`sleepLocation` in `GET /settings`; empty fields fall back to the `defaults.sleep_*` texts)
 
 ### RSVPForm.jsx
 **Flow:** access code → guest names → attendance → meal preferences → review → success. Names are collected *before* asking about attendance, so clicking "Regretfully decline" submits the RSVP immediately (with the names) and shows the "we will miss you" screen. The meal section is configured in wp-admin → Wedding → RSVP → Meal Options: a checkbox turns the dish choice off (fixed menu: only allergies/notes are asked), and the options list (one per line) replaces the translated defaults when filled. Allergens work the same way (Allergens box) and are always asked, as tick buttons plus a free-text "Not in the list? Tell us more" field. If a submission fails, an error is shown and the guest can retry instead of seeing a fake success screen.
